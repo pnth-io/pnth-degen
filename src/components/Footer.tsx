@@ -16,6 +16,14 @@ export function Footer() {
             className="transition-all group-hover:drop-shadow-[0_0_6px_rgba(97,202,135,0.5)]"
           />
         </Link>
+        <Link 
+          href="https://twitter.com/pnth_io" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-textSecondary hover:text-pnthGreen text-xs transition-colors"
+        >
+          @pnth_io
+        </Link>
         <ThemeHoverCard />
       </div>
     </footer>

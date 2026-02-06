@@ -130,22 +130,21 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  border-radius: inherit;
   background:
     /* Top-left corner */
-    linear-gradient(to right, rgba(97, 202, 135, 0.6) 30px, transparent 30px) 0 0,
-    linear-gradient(to bottom, rgba(97, 202, 135, 0.6) 30px, transparent 30px) 0 0,
+    linear-gradient(to right, rgba(97, 202, 135, 0.6) 20px, transparent 20px) 0 0,
+    linear-gradient(to bottom, rgba(97, 202, 135, 0.6) 20px, transparent 20px) 0 0,
     /* Top-right corner */
-    linear-gradient(to left, rgba(97, 202, 135, 0.6) 30px, transparent 30px) 100% 0,
-    linear-gradient(to bottom, rgba(97, 202, 135, 0.6) 30px, transparent 30px) 100% 0,
+    linear-gradient(to left, rgba(97, 202, 135, 0.6) 20px, transparent 20px) 100% 0,
+    linear-gradient(to bottom, rgba(97, 202, 135, 0.6) 20px, transparent 20px) 100% 0,
     /* Bottom-left corner */
-    linear-gradient(to right, rgba(97, 202, 135, 0.6) 30px, transparent 30px) 0 100%,
-    linear-gradient(to top, rgba(97, 202, 135, 0.6) 30px, transparent 30px) 0 100%,
+    linear-gradient(to right, rgba(97, 202, 135, 0.6) 20px, transparent 20px) 0 100%,
+    linear-gradient(to top, rgba(97, 202, 135, 0.6) 20px, transparent 20px) 0 100%,
     /* Bottom-right corner */
-    linear-gradient(to left, rgba(97, 202, 135, 0.6) 30px, transparent 30px) 100% 100%,
-    linear-gradient(to top, rgba(97, 202, 135, 0.6) 30px, transparent 30px) 100% 100%;
+    linear-gradient(to left, rgba(97, 202, 135, 0.6) 20px, transparent 20px) 100% 100%,
+    linear-gradient(to top, rgba(97, 202, 135, 0.6) 20px, transparent 20px) 100% 100%;
   background-repeat: no-repeat;
-  background-size: 30px 2px, 2px 30px;
+  background-size: 20px 2px, 2px 20px, 20px 2px, 2px 20px, 20px 2px, 2px 20px, 20px 2px, 2px 20px;
 }
 
 /* ========================================
@@ -160,29 +159,28 @@ body {
   position: relative;
 }
 
-/* Corner brackets decoration */
+/* Corner brackets decoration - all 4 corners */
 .pnth-table-container::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 16px;
-  height: 16px;
-  border-top: 2px solid rgba(97, 202, 135, 0.4);
-  border-left: 2px solid rgba(97, 202, 135, 0.4);
+  inset: 0;
   pointer-events: none;
-}
-
-.pnth-table-container::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 16px;
-  height: 16px;
-  border-top: 2px solid rgba(97, 202, 135, 0.4);
-  border-right: 2px solid rgba(97, 202, 135, 0.4);
-  pointer-events: none;
+  z-index: 10;
+  background:
+    /* Top-left corner */
+    linear-gradient(to right, rgba(97, 202, 135, 0.5) 20px, transparent 20px) 0 0,
+    linear-gradient(to bottom, rgba(97, 202, 135, 0.5) 20px, transparent 20px) 0 0,
+    /* Top-right corner */
+    linear-gradient(to left, rgba(97, 202, 135, 0.5) 20px, transparent 20px) 100% 0,
+    linear-gradient(to bottom, rgba(97, 202, 135, 0.5) 20px, transparent 20px) 100% 0,
+    /* Bottom-left corner */
+    linear-gradient(to right, rgba(97, 202, 135, 0.5) 20px, transparent 20px) 0 100%,
+    linear-gradient(to top, rgba(97, 202, 135, 0.5) 20px, transparent 20px) 0 100%,
+    /* Bottom-right corner */
+    linear-gradient(to left, rgba(97, 202, 135, 0.5) 20px, transparent 20px) 100% 100%,
+    linear-gradient(to top, rgba(97, 202, 135, 0.5) 20px, transparent 20px) 100% 100%;
+  background-repeat: no-repeat;
+  background-size: 20px 2px, 2px 20px, 20px 2px, 2px 20px, 20px 2px, 2px 20px, 20px 2px, 2px 20px;
 }
 
 /* ========================================
