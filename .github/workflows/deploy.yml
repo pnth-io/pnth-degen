@@ -1,0 +1,41 @@
+name: Deploy to Hetzner
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy
+        env:
+          COMPOSE_PROJECT_NAME: pnth-degen
+        run: |
+          cd /opt/apps/pnth-degen
+          git fetch origin
+          git reset --hard origin/main
+          
+          docker compose build --no-cache
+          docker compose up -d
+          docker image prune -f
+
+      - name: Health check
+        run: |
+          echo "Waiting for container..."
+          sleep 15
+          for i in {1..6}; do
+            if curl -sf https://degen.pnth.app > /dev/null; then
+              echo "✅ Deploy successful"
+              exit 0
+            fi
+            echo "Attempt $i/6 - waiting..."
+            sleep 5
+          done
+          echo "❌ Health check failed"
+          exit 1

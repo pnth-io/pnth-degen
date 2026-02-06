@@ -1,0 +1,20 @@
+services:
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_MOBULA_API_KEY: ${NEXT_PUBLIC_MOBULA_API_KEY}
+    container_name: pnth-degen
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.pnth-degen.rule=Host(`degen.pnth.app`)
+      - traefik.http.routers.pnth-degen.entrypoints=websecure
+      - traefik.http.routers.pnth-degen.tls.certresolver=letsencrypt
+      - traefik.http.services.pnth-degen.loadbalancer.server.port=3000
+    networks:
+      - traefik-web
+
+networks:
+  traefik-web:
+    external: true

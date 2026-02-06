@@ -10,6 +10,6 @@ export async function register() {
     return;
   }
 
-  await import('../../packages/globals/tracer');
+  // Tracer disabled - not using Datadog
+  // await import('../../packages/globals/tracer');
 }
-
