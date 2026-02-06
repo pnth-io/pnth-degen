@@ -60,10 +60,7 @@ body {
    PANTHEON GRID BACKGROUND
    ======================================== */
 
-@keyframes grid-pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
-}
+/* grid-pulse animation removed - was causing constant repaints */
 
 .pnth-grid-background {
   position: fixed;
@@ -71,10 +68,10 @@ body {
   pointer-events: none;
   z-index: 0;
   background-image: 
-    linear-gradient(rgba(97, 202, 135, 0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(97, 202, 135, 0.12) 1px, transparent 1px);
+    linear-gradient(rgba(97, 202, 135, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(97, 202, 135, 0.08) 1px, transparent 1px);
   background-size: 50px 50px;
-  animation: grid-pulse 6s ease-in-out infinite;
+  opacity: 0.8;
 }
 
 .pnth-grid-background::before {
@@ -107,7 +104,7 @@ body {
 .pnth-card {
   background: var(--pnth-bg-overlay);
   border: 1px solid var(--pnth-border);
-  backdrop-filter: blur(12px);
+  /* backdrop-filter removed - too expensive with frequent updates */
   box-shadow: 
     0 0 50px rgba(97, 202, 135, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
@@ -154,7 +151,7 @@ body {
 .pnth-table-container {
   background: var(--pnth-bg-card);
   border: 1px solid var(--pnth-border);
-  backdrop-filter: blur(12px);
+  /* backdrop-filter removed - performance */
   box-shadow: 0 0 60px rgba(97, 202, 135, 0.04);
   position: relative;
 }
@@ -458,7 +455,6 @@ input[type=number] {
   gap: 8px;
   background: var(--pnth-bg-overlay) !important;
   border: 1px solid var(--pnth-border) !important;
-  backdrop-filter: blur(12px);
 }
 
 [data-sonner-toast] [data-icon] {
