@@ -79,7 +79,7 @@ export default function DisplayModal({ isOpen, onClose }: DisplayModalProps) {
 
       {/* Modal */}
       <div
-        className="absolute top-full mt-2 w-80 rounded-3xl max-w-[90vw] bg-bgPrimary border-[1px] border-borderDefault shadow-xl z-50 p-4"
+        className="absolute top-full mt-2 w-80 max-w-[90vw] bg-bgPrimary border border-borderDefault shadow-xl z-50 p-4 pnth-card"
         style={{ right: 0 }}
         ref={modalRef}
       >
@@ -92,7 +92,7 @@ export default function DisplayModal({ isOpen, onClose }: DisplayModalProps) {
                 key={size}
                 type="button"
                 className={cn(
-                  'p-3 rounded-lg cursor-pointer text-sm border-borderDefault border-[1px] font-medium transition-all duration-200',
+                  'p-3 cursor-pointer text-sm border-borderDefault border font-medium transition-all duration-200',
                   metricSize === size
                     ? 'bg-success/10 border-success/40 text-success shadow-sm'
                     : 'bg-bgContainer/5 border-borderDarkSlateGray text-grayCool hover:border-borderDefault hover:text-textPrimary hover:bg-bgContainer/10',

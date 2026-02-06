@@ -314,7 +314,7 @@ export const SearchModal = ({
       >
         <div
           ref={modalRef}
-          className={`bg-bgPrimary w-full max-w-[700px] rounded-xl shadow-lg border border-borderDefault flex flex-col transform transition-all duration-200
+          className={`pnth-card bg-bgPrimary w-full max-w-[700px] shadow-lg flex flex-col transform transition-all duration-200
             ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}
           `}
         >

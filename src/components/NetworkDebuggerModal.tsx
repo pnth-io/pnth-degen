@@ -72,7 +72,7 @@ export function NetworkDebuggerModal({ isOpen, onClose }: NetworkDebuggerModalPr
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-bgPrimary border border-borderDefault rounded-xl shadow-2xl flex flex-col max-w-7xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
+      <div className="pnth-card bg-bgPrimary shadow-2xl flex flex-col max-w-7xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-bgOverlay to-bgPrimary border-b border-borderDefault">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">

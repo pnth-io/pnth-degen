@@ -146,7 +146,7 @@ export function SwapQuoteModal() {
         aria-labelledby="swap-modal-title"
       >
       <div
-        className={`flex w-full max-w-[420px] flex-col rounded-xl sm:rounded-2xl bg-bgPrimary shadow-2xl border border-borderDefault overflow-hidden transform transition-all duration-200 ${
+        className={`pnth-card flex w-full max-w-[420px] flex-col bg-bgPrimary shadow-2xl overflow-hidden transform transition-all duration-200 ${
           isModalOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         }`}
         onClick={(e) => e.stopPropagation()}

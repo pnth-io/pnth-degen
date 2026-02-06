@@ -51,7 +51,7 @@ export function FilterModal() {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 px-4 sm:px-0">
-      <div className="flex w-full max-w-md flex-col rounded-xl bg-bgPrimary shadow-xl border border-borderDefault sm:max-h-[90vh]">
+      <div className="pnth-card flex w-full max-w-md flex-col bg-bgPrimary shadow-xl sm:max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-borderDefault px-4 py-3">
           <h2 className="text-base font-medium text-textPrimary">Wallet Filter</h2>

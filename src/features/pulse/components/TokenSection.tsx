@@ -231,7 +231,7 @@ export default function TokenSection({
             placeholder="Search tokens by name, symbol, or address..."
             value={searchQuery}
             onChange={handleSearchChange}
-            className="w-full bg-bgOverlay border border-borderDefault rounded-md pl-9 pr-9 py-1.5 text-xs text-textPrimary placeholder:text-textTertiary focus:outline-none focus:ring-1 focus:ring-success/50 transition-colors"
+            className="pnth-input w-full pl-9 pr-9 py-1.5 text-xs"
           />
           {searchQuery && (
             <button

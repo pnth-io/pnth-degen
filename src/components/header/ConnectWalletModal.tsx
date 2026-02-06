@@ -160,9 +160,9 @@ export function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps)
         <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-4">
           {isConnected && address ? (
             <>
-              <div className="bg-bgSecondary/50 rounded-xl p-5 border border-borderDefault mb-4">
+              <div className="bg-bgSecondary/50 p-5 border border-borderDefault mb-4">
                 <div className="flex items-start gap-4">
-                  <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 p-2.5 ${
+                  <div className={`w-14 h-14 flex items-center justify-center flex-shrink-0 p-2.5 ${
                     isMetaMask ? 'bg-orange-500/10' : 'bg-purple-500/10'
                   }`}>
                     <SafeImage

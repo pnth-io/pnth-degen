@@ -61,7 +61,7 @@ export function EmojiPickerModal({ isOpen, onClose, onSelect, currentEmoji }: Em
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="bg-bgPrimary border border-borderDefault rounded-xl p-0 
+        className="pnth-card bg-bgPrimary p-0 
                    w-[95vw] sm:w-[400px] md:w-[420px]
                    h-[75vh] sm:h-[550px] md:h-[580px]
                    shadow-xl overflow-hidden"

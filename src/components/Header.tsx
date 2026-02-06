@@ -122,16 +122,16 @@ const Header = () => {
             {/* Search - Hidden on small mobile, visible from sm */}
             <div
               onClick={openSearch}
-              className="hidden sm:flex flex-1 max-w-xs md:max-w-md h-9 relative cursor-pointer"
+              className="hidden sm:flex flex-1 max-w-xs md:max-w-md h-9 relative cursor-pointer pnth-brackets"
             >
               <input
                 type="text"
                 placeholder="Search tokens..."
-                className="pnth-input w-full text-sm rounded-md pl-10 pr-4 py-[6px] cursor-pointer"
+                className="pnth-input w-full text-sm pl-10 pr-4 py-[6px] cursor-pointer"
                 readOnly
               />
               <FiSearch className="absolute left-4 top-[10px] text-success/60" size={16} />
-              <span className="absolute right-3 top-2.5 border border-success/30 rounded text-[10px] font-semibold text-success/60 px-1.5 flex justify-center items-center">
+              <span className="absolute right-3 top-2.5 border border-success/30 text-[10px] font-semibold text-success/60 px-1.5 flex justify-center items-center">
                 <span className="animate-spinSlow inline-block">/</span>
               </span>
             </div>
@@ -190,7 +190,6 @@ const Header = () => {
             </div>
           </div>
         </div>
-        <div className="bg-bgSecondary/50 h-6 sm:h-7 border-t border-borderDefault"></div>
         <MobileWarningBanner />
       </header>
 

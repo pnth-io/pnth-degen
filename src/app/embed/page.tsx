@@ -446,7 +446,7 @@ function EmbedPageContent() {
           {/* Left Column - Configuration */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
             {/* Step 1 */}
-            <div className="pnth-card rounded-lg p-4 sm:p-6">
+            <div className="pnth-card p-4 sm:p-6">
               <h2 className="text-xs sm:text-sm font-semibold text-textPrimary mb-3 sm:mb-4">
                 Step 1: I want to generate a chart for
               </h2>
@@ -591,7 +591,7 @@ function EmbedPageContent() {
             </div>
 
             {/* Step 2 */}
-            <div className="pnth-card rounded-lg p-4 sm:p-6">
+            <div className="pnth-card p-4 sm:p-6">
               <h2 className="text-xs sm:text-sm font-semibold text-textPrimary mb-3 sm:mb-4">
                 Step 2: I want the resolution to be
               </h2>
@@ -673,7 +673,7 @@ function EmbedPageContent() {
             </div>
 
             {/* Step 3 */}
-            <div className="pnth-card rounded-lg p-4 sm:p-6">
+            <div className="pnth-card p-4 sm:p-6">
               <h2 className="text-xs sm:text-sm font-semibold text-textPrimary mb-3 sm:mb-4">
                 Step 3: I want the colours to be
               </h2>
@@ -819,7 +819,7 @@ function EmbedPageContent() {
             </div>
 
             {/* Step 4: Chart Size */}
-            <div className="pnth-card rounded-lg p-4 sm:p-6">
+            <div className="pnth-card p-4 sm:p-6">
               <h2 className="text-xs sm:text-sm font-semibold text-textPrimary mb-3 sm:mb-4">
                 Step 4: I want the chart size to be
               </h2>
@@ -858,7 +858,7 @@ function EmbedPageContent() {
             </div>
 
             {/* Notes Section */}
-            <div className="pnth-card rounded-lg p-4 sm:p-6">
+            <div className="pnth-card p-4 sm:p-6">
               <h3 className="text-xs sm:text-sm font-semibold text-textPrimary mb-2">Notes</h3>
               <p className="text-xs sm:text-sm text-textSecondary leading-relaxed">
                 You can use charts for multiple tokens by replacing the URL with your pool or token address.
@@ -870,7 +870,7 @@ function EmbedPageContent() {
           {/* Right Column - Preview & Code */}
           <div className="lg:col-span-3 space-y-4 sm:space-y-6">
             {/* Preview */}
-            <div className="pnth-card rounded-lg p-4 sm:p-6">
+            <div className="pnth-card p-4 sm:p-6">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h2 className="text-xs sm:text-sm font-semibold text-textPrimary">Preview</h2>
                 <button
@@ -907,7 +907,7 @@ function EmbedPageContent() {
             </div>
 
             {/* Generated Code */}
-            <div className="pnth-card rounded-lg p-4 sm:p-6">
+            <div className="pnth-card p-4 sm:p-6">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h2 className="text-xs sm:text-sm font-semibold text-textPrimary">Generated Code</h2>
                 <button

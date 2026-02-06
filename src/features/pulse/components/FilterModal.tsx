@@ -354,9 +354,9 @@ const FilterModal: React.FC<FilterModalProps> = ({
     >
       <div
         ref={contentRef}
-        className={`bg-bgPrimary border border-borderDefault w-full flex flex-col overflow-hidden ${isMobileViewport
-            ? 'h-full max-h-none rounded-none'
-            : 'max-w-lg max-h-[85vh] rounded-md'
+        className={`pnth-card bg-bgPrimary w-full flex flex-col overflow-hidden ${isMobileViewport
+            ? 'h-full max-h-none'
+            : 'max-w-lg max-h-[85vh]'
           }`}
       >
         {/* Header */}
@@ -478,7 +478,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                     onChange={(e) => {
                       setSection(activeType, 'includeKeywords', e.target.value);
                     }}
-                    className="w-full bg-bgOverlay border border-borderDefault rounded-md px-3 py-2 text-sm text-textPrimary placeholder:text-xs placeholder:text-textTertiary focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors"
+                    className="pnth-input w-full px-3 py-2 text-sm placeholder:text-xs"
                   />
                 </div>
                 <div>
@@ -492,7 +492,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                     onChange={(e) => {
                       setSection(activeType, 'excludeKeywords', e.target.value);
                     }}
-                    className="w-full bg-bgOverlay border border-borderDefault rounded-md px-3 py-2 text-sm text-textPrimary placeholder:text-xs placeholder:text-textTertiary focus:outline-none focus:ring-1 focus:ring-green-500 transition-colors"
+                    className="pnth-input w-full px-3 py-2 text-sm placeholder:text-xs"
                   />
                 </div>
               </div>

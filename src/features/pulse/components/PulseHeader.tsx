@@ -10,17 +10,13 @@ export default function PulseHeader() {
 
   return (
     <>
-      {/* Desktop Header */}
-      <div className="hidden text-textPrimary md:flex justify-between items-center px-4 ">
-        <div className="flex items-center gap-4">
-          <h1 className="text-xl text-textPrimary font-bold">Pulse</h1>
-        </div>
-
-        <div className="flex items-center rounded-3xl gap-2">
+      {/* Desktop Header - Display controls only (title is now in tabs) */}
+      <div className="hidden text-textPrimary md:flex items-center">
+        <div className="flex items-center gap-2">
           <div className="relative">
             <button
               type="button"
-              className="flex items-center bg-bgContainer rounded-3xl px-4 space-x-2 h-8 py-1.5 hover:bg-bgContainer/50 border-[1px] border-borderDefault cursor-pointer transition"
+              className="pnth-button-outline flex items-center px-4 space-x-2 h-8 py-1.5 cursor-pointer"
               onClick={() => setDisplayOpen((open) => !open)}
             >
               <MenuIcon />
