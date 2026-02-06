@@ -2,12 +2,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ThemeHoverCard } from '@/components/ThemeHoverCard';
 
-const links = [
-  { name: 'Docs', href: 'https://docs.pnth.io' },
-  { name: 'Support', href: 'https://t.me/pantheon_io' },
-  { name: 'Twitter', href: 'https://x.com/pikitrader' },
-];
-
 export function Footer() {
   return (
     <footer className="w-full border-t border-borderDefault bg-bgBase/90 backdrop-blur-md py-[6px] px-4 flex items-center justify-between mt-auto">
@@ -23,19 +17,6 @@ export function Footer() {
           />
         </Link>
         <ThemeHoverCard />
-      </div>
-      <div className="flex space-x-6 text-xs font-normal text-textSecondary">
-        {links.map((link) => (
-          <Link
-            key={link.name}
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-success transition-colors pnth-text-glow"
-          >
-            {link.name}
-          </Link>
-        ))}
       </div>
     </footer>
   );
