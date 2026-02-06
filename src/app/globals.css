@@ -71,8 +71,8 @@ body {
   pointer-events: none;
   z-index: 0;
   background-image: 
-    linear-gradient(rgba(97, 202, 135, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(97, 202, 135, 0.08) 1px, transparent 1px);
+    linear-gradient(rgba(97, 202, 135, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(97, 202, 135, 0.12) 1px, transparent 1px);
   background-size: 50px 50px;
   animation: grid-pulse 6s ease-in-out infinite;
 }
@@ -84,8 +84,8 @@ body {
   left: 50%;
   transform: translateX(-50%);
   width: 150%;
-  height: 600px;
-  background: radial-gradient(ellipse at center, rgba(97, 202, 135, 0.2) 0%, rgba(97, 202, 135, 0.08) 40%, transparent 70%);
+  height: 700px;
+  background: radial-gradient(ellipse at center, rgba(97, 202, 135, 0.25) 0%, rgba(97, 202, 135, 0.12) 40%, transparent 70%);
   pointer-events: none;
 }
 

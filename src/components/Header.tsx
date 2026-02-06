@@ -108,21 +108,15 @@ const Header = () => {
           {/* Left side: Logo, Search, Nav */}
           <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 flex-1 min-w-0">
             {/* Logo - Pantheon */}
-            <Link href="/" className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 group">
+            <Link href="/" className="flex items-center flex-shrink-0 group">
               <SafeImage
                 src="/pantheon-logo.svg"
                 alt="Pantheon Logo"
-                width={28}
-                height={28}
-                className="w-6 h-6 sm:w-7 sm:h-7 transition-all group-hover:drop-shadow-[0_0_8px_rgba(97,202,135,0.5)]"
+                width={36}
+                height={36}
+                className="w-8 h-8 sm:w-9 sm:h-9 transition-all group-hover:drop-shadow-[0_0_12px_rgba(97,202,135,0.6)]"
                 priority
               />
-              <div className="flex items-baseline gap-1 sm:gap-1.5">
-                <h1 className="font-geist font-bold text-white text-base sm:text-lg md:text-xl tracking-tight group-hover:text-success transition-colors">
-                  PANTHEON
-                </h1>
-                <span className="text-[10px] sm:text-xs md:text-sm text-success/70 hidden sm:inline font-medium">DEGEN</span>
-              </div>
             </Link>
 
             {/* Search - Hidden on small mobile, visible from sm */}

@@ -21,13 +21,13 @@ const PulsePageView = () => {
   }
 
   return (
-    <div className="bg-bgPrimary">
+    <div className="bg-transparent">
       <div className="px-4 pt-3 pb-1">
         <PulseHeader />
       </div>
       <div
         className={`px-4 md:grid md:grid-cols-3 p-0 min-h-[calc(100vh-200px)] py-2 ${
-          compactTables ? 'gap-2 p-2' : 'gap-0'
+          compactTables ? 'gap-3 p-2' : 'gap-0'
         }`}
       >
         {loading ? (
@@ -36,8 +36,8 @@ const PulsePageView = () => {
             <div
               className={`overflow-hidden ${
                 compactTables
-                  ? 'border-[1px] border-borderDefault rounded-lg'
-                  : 'border-x-[1px] border-b border-borderDefault'
+                  ? 'pnth-card rounded-lg'
+                  : 'pnth-table-container border-x-[1px] border-b'
               }`}
             >
               <TokenSectionSkeleton title="New Pairs" />
@@ -47,8 +47,8 @@ const PulsePageView = () => {
             <div
               className={`overflow-hidden ${
                 compactTables
-                  ? 'border border-borderDefault rounded-lg'
-                  : 'border-r border-b border-borderDefault'
+                  ? 'pnth-card rounded-lg'
+                  : 'pnth-table-container border-r border-b'
               }`}
             >
               <TokenSectionSkeleton title="Final Stretch" />
@@ -58,8 +58,8 @@ const PulsePageView = () => {
             <div
               className={`overflow-hidden ${
                 compactTables
-                  ? 'border border-borderDefault rounded-lg'
-                  : 'border-r border-b border-borderDefault'
+                  ? 'pnth-card rounded-lg'
+                  : 'pnth-table-container border-r border-b'
               }`}
             >
               <TokenSectionSkeleton title="Migrated" />
@@ -71,8 +71,8 @@ const PulsePageView = () => {
             <div
               className={`overflow-hidden ${
                 compactTables
-                  ? 'border-[1px] border-borderDefault rounded-lg'
-                  : 'border-x-[1px] border-b border-borderDefault'
+                  ? 'pnth-card rounded-lg'
+                  : 'pnth-table-container border-x-[1px] border-b'
               }`}
             >
               <TokenSection
@@ -87,8 +87,8 @@ const PulsePageView = () => {
             <div
               className={`overflow-hidden ${
                 compactTables
-                  ? 'border border-borderDefault rounded-lg'
-                  : 'border-r border-b border-borderDefault'
+                  ? 'pnth-card rounded-lg'
+                  : 'pnth-table-container border-r border-b'
               }`}
             >
               <TokenSection
@@ -103,8 +103,8 @@ const PulsePageView = () => {
             <div
               className={`overflow-hidden ${
                 compactTables
-                  ? 'border border-borderDefault rounded-lg'
-                  : 'border-r border-b border-borderDefault'
+                  ? 'pnth-card rounded-lg'
+                  : 'pnth-table-container border-r border-b'
               }`}
             >
               <TokenSection

@@ -117,7 +117,7 @@ export default async function PairPage({ params }: PairPageProps) {
           />
         </div>
       </div>
-      <aside className="w-full lg:w-[25%] mr-2 xl:w-[20%] bg-bgPrimary flex flex-col border-l border-borderDefault overflow-y-auto scrollbar-hide">
+      <aside className="w-full lg:w-[25%] mr-2 xl:w-[20%] bg-transparent flex flex-col border-l border-borderDefault overflow-y-auto scrollbar-hide">
         <PairStatsCards />
       </aside>
     </main>
