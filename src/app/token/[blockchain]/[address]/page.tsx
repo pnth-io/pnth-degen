@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: TokenPageProps) {
 
   if (!initialData) {
     return {
-      title: 'Token not found - Mobula',
+      title: 'Token not found - Pantheon Degen',
       description: 'No Token data available for this address',
     };
   }
@@ -42,9 +42,9 @@ export async function generateMetadata({ params }: TokenPageProps) {
   const price = formatPriceWithPlaceholder(initialData.priceUSD);
   const volume = initialData.volume24hUSD || 0;
   const tokenAddress = initialData.address;
-  const baseTokenLogo = initialData.logo || "https://framerusercontent.com/images/83wKw3MxTAt4Shj56JmraGNXdM.png?scale-down-to=1024"
+  const baseTokenLogo = initialData.logo || "https://pnth.io/logo.png"
 
-  const title = `${initialData?.symbol} ${price} ${initialData?.symbol || 'USD'} price today, ${initialData?.name} live chart, forecast | Mobula`;
+  const title = `${initialData?.symbol} ${price} ${initialData?.symbol || 'USD'} price today, ${initialData?.name} live chart | Pantheon Degen`;
   const readablePrice = price === 'N/A' ? 'N/A' : `$${price}`;
   const description = `The ${initialData?.name} live price is ${readablePrice} ${initialData?.symbol || 'USD'} with a 24h volume of $${volume.toLocaleString()} USD. Buy ${initialData?.symbol}. Check ${initialData?.symbol} airdrop and audits. ${tokenAddress} is ${initialData?.symbol} (${initialData?.name}) token contract address on ${initialData.blockchain}.`;
 
@@ -55,14 +55,14 @@ export async function generateMetadata({ params }: TokenPageProps) {
       title,
       description,
       type: 'website',
-      url: `https://mobula.fi/pair/${tokenAddress}`,
-      siteName: 'Mobula',
+      url: `https://degen.pnth.app/token/${tokenAddress}`,
+      siteName: 'Pantheon Degen',
       images: [
         {
           url: baseTokenLogo,
           width: 300,
           height: 300,
-          alt: 'Mobula',
+          alt: 'Pantheon Degen',
           type: 'image/png',
         },
       ],

@@ -1,151 +1,411 @@
 /** biome-ignore-all lint/suspicious/noUnknownAtRules: <lint> */
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Define font and color variables */
+/* ========================================
+   PANTHEON DESIGN SYSTEM - CSS Variables
+   ======================================== */
+
 :root {
-  --font-menlo: "Menlo", monospace;
-  --bg-primary: #121319;
-  --bg-overlay: #0F1116;  
-  --bg-tableAlt: #181A21; 
-  --bg-tableHover: #1D2028; 
-  --success: #18C722;
+  --font-geist: "Geist Mono", monospace;
+  
+  /* Pantheon Colors */
+  --pnth-bg: #030712;
+  --pnth-bg-primary: #0a0a0f;
+  --pnth-bg-secondary: #0f1116;
+  --pnth-bg-overlay: rgba(17, 24, 39, 0.7);
+  --pnth-bg-card: rgba(17, 24, 39, 0.6);
+  --pnth-bg-table-alt: rgba(17, 24, 39, 0.4);
+  --pnth-bg-table-hover: rgba(97, 202, 135, 0.08);
+  
+  /* Pantheon Green */
+  --pnth-green: #61CA87;
+  --pnth-green-rgb: 97, 202, 135;
+  --pnth-green-light: #7dd49e;
+  --pnth-green-dark: #4fb574;
+  
+  /* Pantheon Red */
+  --pnth-red: #d55355;
+  --pnth-red-rgb: 213, 83, 85;
+  
+  /* Text Colors */
+  --pnth-text-primary: #ffffff;
+  --pnth-text-secondary: #9ca3af;
+  --pnth-text-tertiary: #6b7280;
+  
+  /* Borders */
+  --pnth-border: rgba(97, 202, 135, 0.15);
+  --pnth-border-hover: rgba(97, 202, 135, 0.35);
+  
+  /* Legacy mappings for compatibility */
+  --bg-primary: var(--pnth-bg-primary);
+  --bg-overlay: var(--pnth-bg-secondary);  
+  --bg-tableAlt: var(--pnth-bg-table-alt); 
+  --bg-tableHover: var(--pnth-bg-table-hover); 
+  --success: var(--pnth-green);
+  --foreground: var(--pnth-text-secondary);
 }
 
 /* Apply global styles */
 body {
-  font-family: var(--font-menlo);
-  color: var(--foreground, #a0a0a0);
-  background: var(--bg-primary, #121319);
+  font-family: var(--font-geist);
+  color: var(--pnth-text-secondary);
+  background: var(--pnth-bg);
 }
 
-/* Let Tailwind utilities use these variables dynamically */
+/* ========================================
+   PANTHEON GRID BACKGROUND
+   ======================================== */
+
+@keyframes grid-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.pnth-grid-background {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: 
+    linear-gradient(rgba(97, 202, 135, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(97, 202, 135, 0.08) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: grid-pulse 6s ease-in-out infinite;
+}
+
+.pnth-grid-background::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150%;
+  height: 600px;
+  background: radial-gradient(ellipse at center, rgba(97, 202, 135, 0.2) 0%, rgba(97, 202, 135, 0.08) 40%, transparent 70%);
+  pointer-events: none;
+}
+
+.pnth-grid-background::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to top, var(--pnth-bg) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ========================================
+   PANTHEON CARD STYLES - Glass Morphism
+   ======================================== */
+
+.pnth-card {
+  background: var(--pnth-bg-overlay);
+  border: 1px solid var(--pnth-border);
+  backdrop-filter: blur(12px);
+  box-shadow: 
+    0 0 50px rgba(97, 202, 135, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.pnth-card:hover {
+  border-color: var(--pnth-border-hover);
+  box-shadow: 
+    0 0 80px rgba(97, 202, 135, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ========================================
+   PANTHEON TABLE STYLES
+   ======================================== */
+
+.pnth-table-container {
+  background: var(--pnth-bg-card);
+  border: 1px solid var(--pnth-border);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 60px rgba(97, 202, 135, 0.04);
+  position: relative;
+}
+
+/* Corner brackets decoration */
+.pnth-table-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  border-top: 2px solid rgba(97, 202, 135, 0.4);
+  border-left: 2px solid rgba(97, 202, 135, 0.4);
+  pointer-events: none;
+}
+
+.pnth-table-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  border-top: 2px solid rgba(97, 202, 135, 0.4);
+  border-right: 2px solid rgba(97, 202, 135, 0.4);
+  pointer-events: none;
+}
+
+/* ========================================
+   PANTHEON ROW STYLES
+   ======================================== */
+
+.pnth-row {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(97, 202, 135, 0.06);
+}
+
+.pnth-row:hover {
+  background: rgba(97, 202, 135, 0.06);
+  box-shadow: inset 3px 0 0 0 var(--pnth-green);
+}
+
+.pnth-row:last-child {
+  border-bottom: none;
+}
+
+/* ========================================
+   PANTHEON TAB STYLES
+   ======================================== */
+
+.pnth-tab {
+  padding: 10px 16px;
+  border-radius: 6px 6px 0 0;
+  transition: all 0.2s ease;
+  position: relative;
+  font-weight: 500;
+}
+
+.pnth-tab-active {
+  background: var(--pnth-bg-overlay);
+  color: var(--pnth-green);
+  border: 1px solid rgba(97, 202, 135, 0.25);
+  border-bottom: none;
+  box-shadow: 0 -4px 20px rgba(97, 202, 135, 0.12);
+}
+
+.pnth-tab-inactive {
+  background: transparent;
+  color: var(--pnth-text-tertiary);
+  border: 1px solid transparent;
+  border-bottom: none;
+}
+
+.pnth-tab-inactive:hover {
+  color: var(--pnth-green);
+  background: rgba(97, 202, 135, 0.04);
+}
+
+/* ========================================
+   PANTHEON BUTTON STYLES
+   ======================================== */
+
+.pnth-button-primary {
+  background: var(--pnth-green);
+  color: var(--pnth-bg);
+  padding: 10px 24px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 20px rgba(97, 202, 135, 0.25);
+}
+
+.pnth-button-primary:hover {
+  box-shadow: 0 0 30px rgba(97, 202, 135, 0.45);
+  transform: translateY(-1px);
+}
+
+.pnth-button-outline {
+  background: transparent;
+  color: var(--pnth-green);
+  padding: 10px 24px;
+  border: 1px solid rgba(97, 202, 135, 0.4);
+  transition: all 0.2s ease;
+}
+
+.pnth-button-outline:hover {
+  border-color: var(--pnth-green);
+  box-shadow: 0 0 20px rgba(97, 202, 135, 0.15);
+  background: rgba(97, 202, 135, 0.05);
+}
+
+/* ========================================
+   PANTHEON GLOW EFFECTS
+   ======================================== */
+
+.pnth-glow {
+  box-shadow: 0 0 20px rgba(97, 202, 135, 0.2), 0 0 50px rgba(97, 202, 135, 0.08);
+}
+
+.pnth-glow-subtle {
+  box-shadow: 0 0 30px rgba(97, 202, 135, 0.06);
+}
+
+.pnth-text-glow:hover {
+  text-shadow: 0 0 10px rgba(97, 202, 135, 0.4);
+}
+
+/* ========================================
+   PANTHEON INPUT STYLES
+   ======================================== */
+
+.pnth-input {
+  background: rgba(17, 24, 39, 0.5);
+  border: 1px solid var(--pnth-border);
+  color: var(--pnth-text-primary);
+  transition: all 0.2s ease;
+}
+
+.pnth-input:focus {
+  outline: none;
+  border-color: var(--pnth-green);
+  box-shadow: 0 0 20px rgba(97, 202, 135, 0.15);
+}
+
+.pnth-input::placeholder {
+  color: var(--pnth-text-tertiary);
+}
+
+/* ========================================
+   LEGACY COMPATIBILITY CLASSES
+   ======================================== */
+
 .bg-bgPrimary {
-  background-color: var(--bg-primary);
+  background-color: var(--pnth-bg-primary);
 }
 .bg-bgOverlay {
-  background-color: var(--bg-overlay);
+  background-color: var(--pnth-bg-secondary);
 }
 .bg-bgTableAlt {
-  background-color: var(--bg-tableAlt);
+  background-color: var(--pnth-bg-table-alt);
 }
 .bg-bgTableHover {
-  background-color: var(--bg-tableHover);
+  background-color: var(--pnth-bg-table-hover);
 }
 
 .text-success {
-  color: var(--success);
+  color: var(--pnth-green);
 }
 
 .bg-success {
-  background-color: var(--success);
+  background-color: var(--pnth-green);
 }
 
 .border-success {
-  border-color: var(--success);
+  border-color: var(--pnth-green);
 }
 
-/* Theme transitions applied per-component for better performance */
+/* ========================================
+   SCROLLBAR STYLES
+   ======================================== */
 
-
-.animate-custom-spin {
-  animation: custom-spin 1s linear infinite;
-}
-
-/* Base scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;   /* for vertical scrollbar (narrower) */
-  height: 4px;  /* for horizontal scrollbar (shorter) */
+  width: 4px;
+  height: 4px;
 }
 
-/* Vertical scrollbar thumb */
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #777A8C;
+  background-color: rgba(97, 202, 135, 0.3);
   border-radius: 6px;
-
-  
 }
 
-/* Vertical scrollbar track */
 .custom-scrollbar::-webkit-scrollbar-track {
-  background-color: #14151E;
+  background-color: var(--pnth-bg-secondary);
   border-radius: 6px;
-
-
 }
 
-/* Dark mode overrides (if needed) */
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #777A8C;
-}
-
-.dark .custom-scrollbar::-webkit-scrollbar-track {
-  background-color: #14151E;
-}
-
-
-/* Hide scrollbar for Chrome, Safari and Opera */
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
-/* Hide scrollbar for IE, Edge and Firefox */
 .hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* Hide scrollbar for all elements using this class */
 .scrollbar-hide {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
 }
-
 
 .tabs-content-scroll {
   height: 100%;
   overflow-y: auto;
-  -ms-overflow-style: none; /* IE, Edge */
-  scrollbar-width: none;    /* Firefox */
-}
-.tabs-content-scroll::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* Hide scrollbar globally but keep scroll functionality */
+.tabs-content-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 ::-webkit-scrollbar {
   display: none;
 }
 
 html, body {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
+/* ========================================
+   INPUT STYLES
+   ======================================== */
 
-/* Chrome, Safari, Edge */
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* Firefox */
 input[type=number] {
   -moz-appearance: textfield;
 }
 
-/* Sonner Toast Layout - Compact left-aligned */
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+.animate-custom-spin {
+  animation: custom-spin 1s linear infinite;
+}
+
+@keyframes custom-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* ========================================
+   SONNER TOAST STYLES
+   ======================================== */
+
 [data-sonner-toast] {
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
+  background: var(--pnth-bg-overlay) !important;
+  border: 1px solid var(--pnth-border) !important;
+  backdrop-filter: blur(12px);
 }
 
 [data-sonner-toast] [data-icon] {
@@ -169,8 +429,53 @@ input[type=number] {
   padding: 0;
   line-height: 1.2;
   white-space: nowrap;
+  color: var(--pnth-text-primary);
 }
 
 [data-sonner-toast] [data-description] {
   display: none;
+}
+
+/* ========================================
+   PANTHEON PILL/BADGE STYLES
+   ======================================== */
+
+.pnth-pill {
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(97, 202, 135, 0.25);
+  color: var(--pnth-green);
+  background: transparent;
+}
+
+.pnth-pill:hover, .pnth-pill-active {
+  background: rgba(97, 202, 135, 0.12);
+  border-color: rgba(97, 202, 135, 0.4);
+  box-shadow: 0 0 15px rgba(97, 202, 135, 0.15);
+}
+
+/* ========================================
+   PANTHEON TIMEFRAME SELECTOR
+   ======================================== */
+
+.pnth-timeframe {
+  padding: 4px 12px;
+  font-size: 12px;
+  border: 1px solid rgba(97, 202, 135, 0.35);
+  color: var(--pnth-green);
+  transition: all 0.2s ease;
+}
+
+.pnth-timeframe:hover {
+  border-color: var(--pnth-green);
+  box-shadow: 0 0 10px rgba(97, 202, 135, 0.15);
+}
+
+.pnth-timeframe-active {
+  background: var(--pnth-green);
+  color: var(--pnth-bg);
+  border-color: var(--pnth-green);
 }

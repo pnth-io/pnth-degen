@@ -18,7 +18,7 @@ export const fetchCache = 'force-no-store';
 // Security headers for embed routes
 export async function generateMetadata({ params }: EmbedPoolPageProps) {
   return {
-    title: 'Pool Chart Embed - Mobula',
+    title: 'Pool Chart Embed - Pantheon Degen',
     robots: 'noindex, nofollow',
   };
 }

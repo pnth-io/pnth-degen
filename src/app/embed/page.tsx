@@ -395,8 +395,8 @@ function EmbedPageContent() {
     if (!iframeUrl) return '';
     
     return `<iframe
-  id="mobula-chart-embed"
-  title="Mobula Chart Embed"
+  id="pantheon-chart-embed"
+  title="Pantheon Chart Embed"
   src="${iframeUrl}"
   frameborder="0"
   allow="clipboard-write"
@@ -861,8 +861,8 @@ function EmbedPageContent() {
             <div className="bg-bgOverlay border border-borderDefault rounded-lg p-4 sm:p-6">
               <h3 className="text-xs sm:text-sm font-semibold text-textPrimary mb-2">Notes</h3>
               <p className="text-xs sm:text-sm text-textSecondary leading-relaxed">
-                You can use charts for multiple tokens by replacing the Mobula URL with your pool or token address.
-                More embed options are available in Mobula by clicking "Share" then "Embed Charts".
+                You can use charts for multiple tokens by replacing the URL with your pool or token address.
+                More embed options are available by clicking "Share" then "Embed Charts".
               </p>
             </div>
           </div>

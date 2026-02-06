@@ -17,7 +17,7 @@ export const fetchCache = 'force-no-store';
 
 export async function generateMetadata({ params }: EmbedTokenPageProps) {
   return {
-    title: 'Token Chart Embed - Mobula',
+    title: 'Token Chart Embed - Pantheon Degen',
     robots: 'noindex, nofollow',
   };
 }

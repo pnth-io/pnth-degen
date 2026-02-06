@@ -75,8 +75,8 @@ export function DataHeader({
   const priceDisplayValue = formatPriceWithPlaceholder(priceUSD);
   const title =
     primaryToken?.symbol && priceUSD !== undefined
-      ? `${primaryToken.symbol} ${priceDisplayValue} ${secondaryToken?.symbol ?? 'USD'} price today | Mobula`
-      : 'Mobula';
+      ? `${primaryToken.symbol} ${priceDisplayValue} ${secondaryToken?.symbol ?? 'USD'} | Pantheon Degen`
+      : 'Pantheon Degen Terminal';
 
   const liquidityDisplayValue =
     liquidityUSD === undefined ? undefined : formatLiquidityWithPlaceholder(liquidityUSD);
@@ -274,7 +274,7 @@ export function DataHeader({
                               <td className="px-4 py-2 w-[140px]">
                                 <div className="flex items-center gap-2">
                                   <Image
-                                    src={m.exchangeLogo || '/mobula.svg'}
+                                    src={m.exchangeLogo || '/pantheon-logo.svg'}
                                     alt={m.exchange}
                                     width={16}
                                     height={16}

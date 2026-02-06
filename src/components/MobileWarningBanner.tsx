@@ -5,7 +5,7 @@ import { AlertTriangle, X } from 'lucide-react';
 
 import { useIsMobile } from '@/hooks/useIsMobile';
 
-const STORAGE_KEY = 'mtt-mobile-warning-dismissed';
+const STORAGE_KEY = 'pnth-degen-mobile-warning-dismissed';
 
 export const MobileWarningBanner = () => {
   const isMobile = useIsMobile();
@@ -27,15 +27,15 @@ export const MobileWarningBanner = () => {
   }
 
   return (
-    <div className="bg-amber-400 text-[#1f1f1f] text-xs sm:text-sm px-3 py-2 flex gap-2 items-start border-b border-amber-300">
+    <div className="bg-success/20 text-success text-xs sm:text-sm px-3 py-2 flex gap-2 items-start border-b border-success/30 backdrop-blur-sm">
       <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
       <div className="flex-1 leading-snug">
-        Mobula Trading Terminal is not optimized for mobile yet. Please use a desktop device for the best experience.
+        Pantheon Degen Terminal is not optimized for mobile yet. Please use a desktop device for the best experience.
       </div>
       <button
         type="button"
         onClick={handleDismiss}
-        className="p-1 text-[#1f1f1f]/70 hover:text-[#1f1f1f] transition-colors"
+        className="p-1 text-success/70 hover:text-success transition-colors"
         aria-label="Dismiss mobile warning banner"
       >
         <X className="h-4 w-4" />

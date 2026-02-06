@@ -11,83 +11,118 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Text
-        textPrimary: '#FCFCFC',      // main text
-        textSecondary: '#9B9B9B',    // secondary text
-        textTertiary: '#777A8C',     // tertiary or dim text
-      
-        // Depth Layers
-        bgBase: '#030303',
-        bgDarkest: '#0F0F0F',        // smoother neutral black
-        bgBaseAlt: '#111111',        // alternate pure dark base
-        bgOverlay: '#0F1116',        // general overlay
-        bgOverlayAlt: '#0F1016',     // darker variant of overlay
-        bgTableAlt: '#181A21',       // lighter table row background
-        bgTableHover: '#1D2028',
+        // Pantheon Primary Colors
+        pnth: {
+          bg: '#030712',
+          green: '#61CA87',
+          'green-light': '#7dd49e',
+          'green-dark': '#4fb574',
+          red: '#d55355',
+        },
 
+        // Text - Pantheon Style
+        textPrimary: '#ffffff',
+        textSecondary: '#9ca3af',
+        textTertiary: '#6b7280',
       
-        // Core Background Layers
-        bgPrimary: '#121319',        // primary background
-        bgSecondary: '#15161D',      // secondary background
-        bgDeepAlt: '#16181F',        // bluish variant (table rows, lists)
-        bgTertiary: '#20222B',       // mid-depth background (headers, panels)
+        // Depth Layers - Pantheon Dark Theme
+        bgBase: '#030712',
+        bgDarkest: '#030712',
+        bgBaseAlt: '#050810',
+        bgOverlay: 'rgba(17, 24, 39, 0.7)',
+        bgOverlayAlt: 'rgba(17, 24, 39, 0.6)',
+        bgTableAlt: 'rgba(17, 24, 39, 0.4)',
+        bgTableHover: 'rgba(97, 202, 135, 0.08)',
+
+        // Core Background Layers - Pantheon
+        bgPrimary: '#0a0a0f',
+        bgSecondary: '#0f1116',
+        bgDeepAlt: '#111827',
+        bgTertiary: '#1f2937',
       
         // Neutral Layers
-        bgNeutral: '#1A1B23',        // balanced neutral
-        bgNeutralDark: '#1A1A1A',    // flat neutral fallback
+        bgNeutral: '#111827',
+        bgNeutralDark: '#0d1117',
       
-        // Surfaces & Components
-        bgSurface: '#1A1C23',        // surface elements
-        bgSurfaceAlt: '#1A1D28',     // alternate surface (hover)
-        bgContainer: '#1C1E27',      // container backgrounds
-        bgPanel: '#23252D',          // panels or modals
-        bgSectionAlt: '#2A2E39',     // cool-toned section background
-        bgCard: '#2C2C33',           // card backgrounds
-        bgElevated: '#2A2D35',       // elevated or popup surfaces
-        bgMuted: '#2A2A2A',          // muted/inactive background
-        bgHighlight: '#343439',      // hover or active highlight background
+        // Surfaces & Components - Glass Morphism
+        bgSurface: 'rgba(17, 24, 39, 0.6)',
+        bgSurfaceAlt: 'rgba(17, 24, 39, 0.7)',
+        bgContainer: 'rgba(17, 24, 39, 0.5)',
+        bgPanel: 'rgba(31, 41, 55, 0.8)',
+        bgSectionAlt: 'rgba(31, 41, 55, 0.6)',
+        bgCard: 'rgba(17, 24, 39, 0.7)',
+        bgElevated: 'rgba(31, 41, 55, 0.7)',
+        bgMuted: 'rgba(17, 24, 39, 0.4)',
+        bgHighlight: 'rgba(97, 202, 135, 0.08)',
       
         // Overlays & Tints
-        bgBackdrop: '#0C0C10BF',     // semi-transparent dark backdrop
-        bgSuccessTint: '#18C72226',  // translucent green tint (success/hover)
+        bgBackdrop: 'rgba(3, 7, 18, 0.8)',
+        bgSuccessTint: 'rgba(97, 202, 135, 0.15)',
       
         // Grays & Whites
-        grayLight: '#C9C9CE',
-        grayMedium: '#848489',
-        grayDark: '#666666',
-        grayGhost: '#C8C9D1',
-        grayNeutral: '#797979',
-        grayBorder: '#CCCCCC',
-        graySlate: '#6B7280',
-        graySlateDark: '#555A66',
-        whiteOverlay: '#FFFFFFEB',   // slightly opaque white
-        whiteTranslucent: '#FFFFFF99',
-        grayExtraLight: '#E0E0E5',
-        grayCool: '#76767A',
+        grayLight: '#d1d5db',
+        grayMedium: '#9ca3af',
+        grayDark: '#6b7280',
+        grayGhost: '#d1d5db',
+        grayNeutral: '#6b7280',
+        grayBorder: '#374151',
+        graySlate: '#6b7280',
+        graySlateDark: '#4b5563',
+        whiteOverlay: 'rgba(255, 255, 255, 0.9)',
+        whiteTranslucent: 'rgba(255, 255, 255, 0.6)',
+        grayExtraLight: '#e5e7eb',
+        grayCool: '#6b7280',
       
-        // Status & Accent Colors
-        success: '#18C722',
-        error: '#F45B5B',
-        warning: '#FFD15C',
-        errorBright: '#FF4D4D',
-        accentRose: '#EC397A',
-        accentPurple: '#8386FF',
+        // Status & Accent Colors - Pantheon
+        success: '#61CA87',
+        error: '#d55355',
+        warning: '#fbbf24',
+        errorBright: '#ef4444',
+        accentRose: '#ec4899',
+        accentPurple: '#8b5cf6',
       
-        // Borders
-        borderPrimary: '#343439',
-        borderDefault: '#22242D',
-        borderSecondary: '#6D6D72',
-        borderSurface: '#2A2D35',
-        borderSuccess: '#00C853',
-        borderMuted: '#444444',
-        borderTertiary: '#2C2E37',
-        borderDarkSlateGray: '#424349'
+        // Borders - Pantheon Green Tinted
+        borderPrimary: 'rgba(97, 202, 135, 0.15)',
+        borderDefault: 'rgba(97, 202, 135, 0.1)',
+        borderSecondary: 'rgba(97, 202, 135, 0.2)',
+        borderSurface: 'rgba(97, 202, 135, 0.12)',
+        borderSuccess: '#61CA87',
+        borderMuted: 'rgba(97, 202, 135, 0.08)',
+        borderTertiary: 'rgba(97, 202, 135, 0.06)',
+        borderDarkSlateGray: 'rgba(55, 65, 81, 0.5)',
 
+        // Override default green with Pantheon green
+        green: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#61ca87',
+          500: '#61ca87',
+          600: '#4fb574',
+          700: '#3d9060',
+          800: '#2f6b4d',
+          900: '#1e4532'
+        },
+
+        // Override default red with Pantheon red
+        red: {
+          50: '#fef2f2',
+          100: '#fee2e2',
+          200: '#fecaca',
+          300: '#fca5a6',
+          400: '#f87171',
+          500: '#d55355',
+          600: '#d55355',
+          700: '#b91c1c',
+          800: '#991b1b',
+          900: '#7f1d1d'
+        },
       },      
       fontFamily: {
-        menlo: ['Menlo', 'monospace'],
-        geist: ['Geist', 'monospace'],
-        sans: ['Inter', 'sans-serif'], // optional for body text
+        menlo: ['Geist Mono', 'Menlo', 'monospace'],
+        geist: ['Geist Mono', 'monospace'],
+        sans: ['Inter', 'sans-serif'],
       },
       fontSize: {
         sm: ['14px', '20px'],
@@ -110,23 +145,30 @@ module.exports = {
       animation: {
         blink: 'blink 10s infinite',
         spinSlow: 'spinSlow 10s linear infinite',
+        'grid-pulse': 'grid-pulse 6s ease-in-out infinite',
       },
       keyframes: {
         blink: {
-          '0%': {
-            opacity: '0.2',
-          },
-          '50%': {
-            opacity: '1',
-          },
-          '100%': {
-            opacity: '0.2',
-          },
+          '0%': { opacity: '0.2' },
+          '50%': { opacity: '1' },
+          '100%': { opacity: '0.2' },
         },
         spinSlow: {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' },
         },
+        'grid-pulse': {
+          '0%, 100%': { opacity: '0.6' },
+          '50%': { opacity: '1' },
+        },
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
+      boxShadow: {
+        'pnth-glow': '0 0 20px rgba(97, 202, 135, 0.2), 0 0 50px rgba(97, 202, 135, 0.08)',
+        'pnth-glow-lg': '0 0 30px rgba(97, 202, 135, 0.3), 0 0 80px rgba(97, 202, 135, 0.12)',
+        'pnth-inner': 'inset 0 1px 0 rgba(255, 255, 255, 0.05)',
       },
     },
   },

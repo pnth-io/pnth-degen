@@ -7,7 +7,6 @@ import { ApiSelectorDropdown } from './header/ApiSelectorDropdown';
 const SearchModal = dynamic(() => import('./SearchModal').then(mod => ({ default: mod.SearchModal })), { ssr: false });
 const NetworkDebuggerModal = dynamic(() => import('./NetworkDebuggerModal').then(mod => ({ default: mod.NetworkDebuggerModal })), { ssr: false });
 
-import { Plus_Jakarta_Sans } from 'next/font/google';
 import { FiSearch } from 'react-icons/fi';
 import { useApiStore } from '@/store/apiStore';
 import { useHeaderStore } from '@/store/useHeaderStore';
@@ -17,13 +16,6 @@ import SafeImage from '@/components/SafeImage';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { MobileWarningBanner } from '@/components/MobileWarningBanner';
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400'],
-  display: 'swap',
-  variable: '--font-plus-jakarta',
-});
 
 const Header = () => {
   const apiButtonRef = useRef<HTMLButtonElement>(null);
@@ -111,27 +103,27 @@ const Header = () => {
 
   return (
     <>
-      <header className="w-full bg-bgPrimary text-white">
-        <div className="flex items-center border-b h-14 sm:h-16 border-borderDefault justify-between px-3 sm:px-4">
+      <header className="w-full bg-bgBase/90 backdrop-blur-md text-white border-b border-borderDefault">
+        <div className="flex items-center h-14 sm:h-16 justify-between px-3 sm:px-4">
           {/* Left side: Logo, Search, Nav */}
           <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 flex-1 min-w-0">
-            {/* Logo */}
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            {/* Logo - Pantheon */}
+            <Link href="/" className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 group">
               <SafeImage
-                src="/mobula.svg"
-                alt="Mobula Logo"
-                width={24}
-                height={24}
-                className="w-5 h-5 sm:w-6 sm:h-6"
+                src="/pantheon-logo.svg"
+                alt="Pantheon Logo"
+                width={28}
+                height={28}
+                className="w-6 h-6 sm:w-7 sm:h-7 transition-all group-hover:drop-shadow-[0_0_8px_rgba(97,202,135,0.5)]"
                 priority
               />
               <div className="flex items-baseline gap-1 sm:gap-1.5">
-                <h1 className={`${plusJakarta.className} font-bold text-white text-base sm:text-lg md:text-xl`}>
-                  mobula
+                <h1 className="font-geist font-bold text-white text-base sm:text-lg md:text-xl tracking-tight group-hover:text-success transition-colors">
+                  PANTHEON
                 </h1>
-                <span className="text-[10px] sm:text-xs md:text-sm text-whiteTranslucent hidden sm:inline">API</span>
+                <span className="text-[10px] sm:text-xs md:text-sm text-success/70 hidden sm:inline font-medium">DEGEN</span>
               </div>
-            </div>
+            </Link>
 
             {/* Search - Hidden on small mobile, visible from sm */}
             <div
@@ -140,12 +132,12 @@ const Header = () => {
             >
               <input
                 type="text"
-                placeholder="Search"
-                className="w-full bg-bgOverlay border border-borderDefault text-grayLight text-sm placeholder-grayLight rounded-md pl-10 pr-4 py-[6px] focus:outline-none cursor-pointer"
+                placeholder="Search tokens..."
+                className="pnth-input w-full text-sm rounded-md pl-10 pr-4 py-[6px] cursor-pointer"
                 readOnly
               />
-              <FiSearch className="absolute left-4 top-[10px] text-grayLight" size={16} />
-              <span className="absolute right-3 top-2.5 border-borderSecondary border-[1px] rounded-sm text-[10px] font-semibold text-grayMedium px-1 flex justify-center items-center">
+              <FiSearch className="absolute left-4 top-[10px] text-success/60" size={16} />
+              <span className="absolute right-3 top-2.5 border border-success/30 rounded text-[10px] font-semibold text-success/60 px-1.5 flex justify-center items-center">
                 <span className="animate-spinSlow inline-block">/</span>
               </span>
             </div>
@@ -153,7 +145,7 @@ const Header = () => {
             {/* Search Icon for Mobile */}
             <button
               onClick={openSearch}
-              className="sm:hidden p-1.5 text-textTertiary hover:text-textPrimary hover:bg-bgOverlay rounded-md transition"
+              className="sm:hidden p-1.5 text-textTertiary hover:text-success hover:bg-success/10 rounded-md transition"
               aria-label="Search"
             >
               <FiSearch size={18} />
@@ -163,20 +155,20 @@ const Header = () => {
             <nav className="hidden lg:flex gap-3 xl:gap-4">
               <Link 
                 href="/" 
-                className={`text-sm transition-colors whitespace-nowrap ${
+                className={`text-sm transition-all whitespace-nowrap ${
                   pathname === '/' 
-                    ? 'text-white font-semibold' 
-                    : 'text-white/70 hover:text-white'
+                    ? 'text-success font-semibold pnth-text-glow' 
+                    : 'text-textSecondary hover:text-success'
                 }`}
               >
                 Pulse
               </Link>
               <Link 
                 href="/embed" 
-                className={`text-sm transition-colors whitespace-nowrap ${
+                className={`text-sm transition-all whitespace-nowrap ${
                   pathname?.startsWith('/embed') 
-                    ? 'text-white font-semibold' 
-                    : 'text-white/70 hover:text-white'
+                    ? 'text-success font-semibold pnth-text-glow' 
+                    : 'text-textSecondary hover:text-success'
                 }`}
               >
                 Widgets
@@ -187,7 +179,7 @@ const Header = () => {
           <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 text-sm flex-shrink-0">
             <button
               onClick={openNetworkDebugger}
-              className="hidden xl:inline-flex items-center gap-2 text-textTertiary hover:text-textPrimary text-xs px-3 py-1.5 hover:bg-bgOverlay rounded-md transition whitespace-nowrap"
+              className="hidden xl:inline-flex items-center gap-2 text-textTertiary hover:text-success text-xs px-3 py-1.5 hover:bg-success/10 rounded-md transition whitespace-nowrap border border-transparent hover:border-success/30"
             >
               Get data
             </button>
@@ -204,7 +196,7 @@ const Header = () => {
             </div>
           </div>
         </div>
-        <div className="bg-bgOverlay h-6 sm:h-7 border-b border-borderDefault"></div>
+        <div className="bg-bgSecondary/50 h-6 sm:h-7 border-t border-borderDefault"></div>
         <MobileWarningBanner />
       </header>
 

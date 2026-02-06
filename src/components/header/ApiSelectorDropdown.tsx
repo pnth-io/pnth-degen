@@ -68,7 +68,7 @@ export const ApiSelectorDropdown = ({
   const regionLabels: Record<WssRegionKey, string> = {
     default: 'Default',
     ovh: 'OVH',
-    mobula: 'Mobula',
+    mobula: 'Primary',
     'pulse-v2': 'Pulse-V2',
   };
 
