@@ -1,44 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import dynamic from 'next/dynamic';
 import { TokenSectionSkeleton } from '@/components/skeleton';
 import PulseHeader from '@/features/pulse/components/PulseHeader';
 import TokenSection from '@/features/pulse/components/TokenSection';
 import { PulseStreamProvider, usePulseStreamContext } from '@/features/pulse/context/PulseStreamContext';
 import { usePulseDisplayStore } from '@/features/pulse/store/usePulseDisplayStore';
-
-// Dynamically import TokenMap to avoid SSR issues
-const TokenMap = dynamic(() => import('@/components/TokenMap'), { 
-  ssr: false,
-  loading: () => (
-    <div className="pnth-card w-full h-[calc(100vh-280px)] min-h-[500px] bg-bgPrimary flex items-center justify-center">
-      <div className="text-center text-textTertiary">
-        <div className="w-8 h-8 border-2 border-success/30 border-t-success rounded-full animate-spin mx-auto mb-2" />
-        <div className="text-sm">Loading map...</div>
-      </div>
-    </div>
-  ),
-});
-
-type TabType = 'pulse' | 'map';
-
-const TabButton = ({ 
-  active, 
-  onClick, 
-  children 
-}: { 
-  active: boolean; 
-  onClick: () => void; 
-  children: React.ReactNode;
-}) => (
-  <button
-    onClick={onClick}
-    className={`pnth-tab ${active ? 'pnth-tab-active' : 'pnth-tab-inactive'}`}
-  >
-    {children}
-  </button>
-);
 
 const PulseView = () => {
   const { compactTables } = usePulseDisplayStore();
@@ -139,16 +105,7 @@ const PulseView = () => {
   );
 };
 
-const MapView = () => {
-  return (
-    <div className="px-4 py-2">
-      <TokenMap />
-    </div>
-  );
-};
-
 const PulsePageView = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('pulse');
   const { error } = usePulseStreamContext();
 
   if (error) {
@@ -162,35 +119,19 @@ const PulsePageView = () => {
 
   return (
     <div className="bg-transparent">
-      {/* Header with Tabs */}
+      {/* Header */}
       <div className="px-4 pt-3 pb-0">
         <div className="flex items-center justify-between">
-          {/* Left side: Tabs */}
-          <div className="flex items-center gap-1">
-            <TabButton 
-              active={activeTab === 'pulse'} 
-              onClick={() => setActiveTab('pulse')}
-            >
-              Pulse
-            </TabButton>
-            <TabButton 
-              active={activeTab === 'map'} 
-              onClick={() => setActiveTab('map')}
-            >
-              Map
-            </TabButton>
-          </div>
-          
-          {/* Right side: PulseHeader controls (only show on Pulse tab) */}
-          {activeTab === 'pulse' && <PulseHeader />}
+          <h1 className="text-xl font-bold text-textPrimary">Pulse</h1>
+          <PulseHeader />
         </div>
         
-        {/* Tab border line */}
-        <div className="border-b border-borderDefault -mx-4" />
+        {/* Border line */}
+        <div className="border-b border-borderDefault -mx-4 mt-3" />
       </div>
       
-      {/* Tab Content */}
-      {activeTab === 'pulse' ? <PulseView /> : <MapView />}
+      {/* Content */}
+      <PulseView />
     </div>
   );
 };
