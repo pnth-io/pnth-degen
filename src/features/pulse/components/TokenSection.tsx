@@ -193,7 +193,7 @@ export default function TokenSection({
   }, [viewName, setSearchQuery]);
 
   return (
-    <div className="bg-bgPrimary max-h-[calc(100vh-20vh)] custom-scrollbar overflow-hidden overflow-y-auto relative">
+    <div className="bg-bgPrimary h-full custom-scrollbar overflow-hidden overflow-y-auto relative">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-bgOverlay flex justify-between items-center px-3 py-1.5 border-y border-borderDefault">
         <div className="flex items-center gap-2 min-w-0 flex-1 py-2">

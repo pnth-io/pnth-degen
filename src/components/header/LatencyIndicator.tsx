@@ -36,7 +36,7 @@ export const LatencyIndicator = memo(
       <button
         ref={buttonRef}
         onClick={toggleSelector}
-        className="px-2 py-1 h-7 flex items-center gap-2 bg-bgContainer border border-borderDefault rounded hover:bg-bgContainer/50 transition-colors cursor-pointer relative"
+        className="pnth-button-outline flex items-center gap-2 px-3 h-8 py-1.5 cursor-pointer"
       >
         <div className={`w-4 h-4 ${bg} bg-opacity-30 animate-blink rounded-full relative`}>
           <div
