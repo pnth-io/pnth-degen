@@ -54,9 +54,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <main className="flex-1 flex flex-col overflow-hidden">
               {children}
             </main>
-            <footer className="sticky bottom-0 z-50">
-              <Footer />
-            </footer>
+            <Footer />
           </div>
           <WalletPortfolioModalWrapper />
       </body>
