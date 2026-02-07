@@ -146,6 +146,16 @@ const Header = () => {
                     : 'text-textSecondary hover:text-success'
                 }`}
               >
+                Garden
+              </Link>
+              <Link 
+                href="/pulse" 
+                className={`text-sm transition-all whitespace-nowrap ${
+                  pathname === '/pulse' 
+                    ? 'text-success font-semibold pnth-text-glow' 
+                    : 'text-textSecondary hover:text-success'
+                }`}
+              >
                 Pulse
               </Link>
               <Link 
