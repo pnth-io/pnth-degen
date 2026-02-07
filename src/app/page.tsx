@@ -14,7 +14,7 @@ const PulseView = () => {
       className={`px-4 md:grid md:grid-cols-3 md:grid-rows-[1fr] p-0 flex-1 pt-2 pb-2 ${
         compactTables ? 'gap-3 p-2' : 'gap-0'
       }`}
-      style={{ height: 'calc(100vh - 120px)' }}
+      style={{ height: 'calc(100vh - 150px)' }}
     >
       {loading ? (
         <>
