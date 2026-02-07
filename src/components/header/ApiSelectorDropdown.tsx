@@ -300,10 +300,10 @@ export const ApiSelectorDropdown = ({
     <div
       ref={dropdownRef}
       style={dropdownStyle}
-      className="z-[9999] w-72 bg-bgSurface border border-borderSurface rounded-lg shadow-2xl max-h-[65vh] overflow-hidden flex flex-col"
+      className="z-[9999] w-72 bg-bgPrimary border border-borderDefault shadow-xl max-h-[65vh] overflow-hidden flex flex-col pnth-card"
     >
       {/* Tabs */}
-      <div className="flex border-b border-borderSurface bg-bgDeepAlt px-1.5 py-1.5 gap-1">
+      <div className="flex border-b border-borderDefault bg-bgPrimary px-1.5 py-1.5 gap-1">
         <button
           onClick={() => setActiveTab('rest')}
           className={`flex-1 px-2.5 py-1.5 text-[11px] font-semibold rounded transition-all duration-200 flex items-center justify-center gap-1 ${isMounted && activeTab === 'rest'
@@ -331,7 +331,7 @@ export const ApiSelectorDropdown = ({
         {isMounted && activeTab === 'rest' ? (
           <>
             {/* Header */}
-            <div className="px-3 py-1.5 border-b border-borderSurface bg-bgDeepAlt/50 sticky top-0">
+            <div className="px-3 py-1.5 border-b border-borderDefault bg-bgPrimary/50 sticky top-0">
               <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Regions</h3>
             </div>
             <div className="py-1">
@@ -365,7 +365,7 @@ export const ApiSelectorDropdown = ({
                             setEditLabel('');
                           }
                         }}
-                        className="w-full bg-bgSurface border border-bgElevated rounded px-2 py-0.5 text-[10px] text-white focus:outline-none focus:border-green-500/50"
+                        className="w-full bg-bgPrimary border border-bgElevated rounded px-2 py-0.5 text-[10px] text-white focus:outline-none focus:border-green-500/50"
                         autoFocus
                         placeholder={option.defaultLabel}
                       />
@@ -423,7 +423,7 @@ export const ApiSelectorDropdown = ({
             {/* Custom URLs */}
             {customUrls.length > 0 && (
               <>
-                <div className="px-3 py-1.5 border-t border-borderSurface bg-bgDeepAlt/50 mt-1 sticky top-0">
+                <div className="px-3 py-1.5 border-t border-borderDefault bg-bgPrimary/50 mt-1 sticky top-0">
                   <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Custom</h3>
                 </div>
                 <div className="py-1">
@@ -479,7 +479,7 @@ export const ApiSelectorDropdown = ({
             )}
 
             {/* Add Custom URL Section */}
-            <div className="border-t border-bgElevated mt-1 sticky bottom-0 bg-bgSurface">
+            <div className="border-t border-bgElevated mt-1 sticky bottom-0 bg-bgPrimary">
               {!showAddForm ? (
                 <button
                   onClick={() => setShowAddForm(true)}
@@ -489,7 +489,7 @@ export const ApiSelectorDropdown = ({
                   Add Custom URL
                 </button>
               ) : (
-                <div className="p-2 space-y-1.5 bg-bgDeepAlt border-t border-bgElevated transition-all duration-200">
+                <div className="p-2 space-y-1.5 bg-bgPrimary border-t border-bgElevated transition-all duration-200">
                   <input
                     type="text"
                     placeholder="Label"
@@ -530,7 +530,7 @@ export const ApiSelectorDropdown = ({
           </>
         ) : isMounted && activeTab === 'wss' ? (
           <>
-            <div className="px-3 py-1.5 border-b border-borderSurface bg-bgDeepAlt/50 sticky top-0">
+            <div className="px-3 py-1.5 border-b border-borderDefault bg-bgPrimary/50 sticky top-0">
               <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">
                 Regions
               </h3>
@@ -572,7 +572,7 @@ export const ApiSelectorDropdown = ({
 
             {customWssUrls.length > 0 && (
               <>
-                <div className="px-3 py-1.5 border-t border-borderSurface bg-bgDeepAlt/50 mt-1 sticky top-0">
+                <div className="px-3 py-1.5 border-t border-borderDefault bg-bgPrimary/50 mt-1 sticky top-0">
                   <h3 className="text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Custom</h3>
                 </div>
                 <div className="py-1">
@@ -679,7 +679,7 @@ export const ApiSelectorDropdown = ({
               </>
             )}
 
-            <div className={`${customWssUrls.length > 0 ? 'border-t border-bgElevated' : 'border-t border-bgElevated mt-1'} sticky bottom-0 bg-bgSurface`}>
+            <div className={`${customWssUrls.length > 0 ? 'border-t border-bgElevated' : 'border-t border-bgElevated mt-1'} sticky bottom-0 bg-bgPrimary`}>
               {!showAddForm ? (
                 <button
                   onClick={() => setShowAddForm(true)}
@@ -689,7 +689,7 @@ export const ApiSelectorDropdown = ({
                   Add Custom WSS URL
                 </button>
               ) : (
-                <div className="p-2 space-y-1.5 bg-bgDeepAlt border-t border-bgElevated transition-all duration-200">
+                <div className="p-2 space-y-1.5 bg-bgPrimary border-t border-bgElevated transition-all duration-200">
                   {/* Mode Toggle */}
                   <div className="flex gap-1 bg-bgPanel rounded p-1">
                     <button
