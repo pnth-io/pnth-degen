@@ -7,12 +7,15 @@ import SafeImage from '@/components/SafeImage';
 import { formatCryptoPrice } from '@mobula_labs/sdk';
 
 // Constants
-const MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
-const MAX_MCAP = 100_000; // $100k
+const MIN_TIME_MS = 30 * 1000; // 30 seconds
+const MAX_TIME_MS = 10 * 60 * 1000; // 10 minutes
+const DEFAULT_TIME_MS = 5 * 60 * 1000; // 5 minutes default
+const MAX_MCAP = 100_000; // $100k - filter out tokens above this
 const MIGRATION_MCAP = 35_000; // $35k migration line
 const MIN_BUBBLE_SIZE = 8;
 const MAX_BUBBLE_SIZE = 40;
-const PADDING = { top: 60, right: 40, bottom: 60, left: 80 };
+const PADDING = { top: 60, right: 40, bottom: 80, left: 80 }; // Increased bottom padding
+const CHART_BOTTOM_MARGIN = 30; // Extra margin above X-axis for bubbles
 
 // Pump protocol identifiers
 const PUMP_PROTOCOLS = ['pumpfun', 'pump.fun', 'pump', 'pumpswap'];
@@ -34,6 +37,7 @@ interface TokenBubble {
   address: string;
   priceChange: number;
   createdAt: number;
+  lastTradeIsBuy: boolean;
 }
 
 interface HoverInfo {
@@ -49,7 +53,7 @@ function isPumpToken(token: PulseToken): boolean {
   
   const source = ((data.source || data.preBondingFactory || '') as string).toLowerCase();
   
-  // Check if source contains pump
+  // Check if source contains pump or is empty (default to pump)
   return PUMP_PROTOCOLS.some(p => source.includes(p)) || source === '';
 }
 
@@ -63,12 +67,26 @@ function extractTokenData(token: PulseToken): {
   createdAt: number;
   bondedAt?: number;
   priceChange: number;
+  lastTradeIsBuy: boolean;
 } {
   const flat = token?.token?.address ? token.token : token;
   const data = flat as Record<string, unknown>;
   
   const createdAtStr = (data.created_at || data.createdAt) as string | undefined;
   const bondedAtStr = data.bonded_at as string | undefined;
+  
+  // Determine last trade direction from buys vs sells or price change
+  const buys = Number(data.buys_24h || data.buys || 0);
+  const sells = Number(data.sells_24h || data.sells || 0);
+  const priceChange = Number(data.price_change_24h || data.priceChange24h || 0);
+  
+  // Use buys vs sells ratio if available, otherwise fall back to price change
+  let lastTradeIsBuy = true;
+  if (buys > 0 || sells > 0) {
+    lastTradeIsBuy = buys >= sells;
+  } else {
+    lastTradeIsBuy = priceChange >= 0;
+  }
   
   return {
     address: (flat?.address || '') as string,
@@ -78,16 +96,18 @@ function extractTokenData(token: PulseToken): {
     marketCap: Number(data.marketCap || data.market_cap || 0),
     createdAt: createdAtStr ? new Date(createdAtStr).getTime() : Date.now(),
     bondedAt: bondedAtStr ? new Date(bondedAtStr).getTime() : undefined,
-    priceChange: Number(data.price_change_24h || 0),
+    priceChange,
+    lastTradeIsBuy,
   };
 }
 
-// Calculate bubble properties - X position based on creation time, not current time
+// Calculate bubble properties
 function calculateBubble(
   token: PulseToken,
   type: ViewName,
   containerWidth: number,
-  containerHeight: number
+  containerHeight: number,
+  maxAgeMs: number
 ): TokenBubble | null {
   const data = extractTokenData(token);
   const now = Date.now();
@@ -96,29 +116,29 @@ function calculateBubble(
   const referenceTime = type === 'bonded' && data.bondedAt ? data.bondedAt : data.createdAt;
   const age = now - referenceTime;
   
-  // Filter out tokens older than 5 minutes
-  if (age > MAX_AGE_MS || age < 0) return null;
-  
-  // Cap market cap at MAX_MCAP for visualization
-  const cappedMcap = Math.min(data.marketCap, MAX_MCAP);
+  // Filter out tokens older than maxAge or with mcap > 100k
+  if (age > maxAgeMs || age < 0) return null;
+  if (data.marketCap > MAX_MCAP) return null;
   
   // Calculate X position based on age (tokens move right as they age)
   const chartWidth = containerWidth - PADDING.left - PADDING.right;
-  const xPercent = age / MAX_AGE_MS; // 0 = just created, 1 = 5 min old
+  const xPercent = age / maxAgeMs; // 0 = just created, 1 = max age
   const x = PADDING.left + xPercent * chartWidth;
   
   // Calculate Y position (mcap: 0 = bottom, 100k = top)
-  const chartHeight = containerHeight - PADDING.top - PADDING.bottom;
-  const y = containerHeight - PADDING.bottom - (cappedMcap / MAX_MCAP) * chartHeight;
+  // Add margin above X-axis so bubbles don't touch the timeline
+  const chartHeight = containerHeight - PADDING.top - PADDING.bottom - CHART_BOTTOM_MARGIN;
+  const yBase = containerHeight - PADDING.bottom - CHART_BOTTOM_MARGIN;
+  const y = yBase - (data.marketCap / MAX_MCAP) * chartHeight;
   
   // Size based on market cap (logarithmic scale)
-  const logMcap = Math.log10(Math.max(cappedMcap, 100));
+  const logMcap = Math.log10(Math.max(data.marketCap, 100));
   const logMax = Math.log10(MAX_MCAP);
   const sizeRatio = logMcap / logMax;
   const size = MIN_BUBBLE_SIZE + sizeRatio * (MAX_BUBBLE_SIZE - MIN_BUBBLE_SIZE);
   
-  // Color based on price change
-  const color = data.priceChange >= 0 ? '#61CA87' : '#ef4444'; // green or red
+  // Color based on last trade direction (buy = green, sell = red)
+  const color = data.lastTradeIsBuy ? '#61CA87' : '#ef4444';
   
   // Determine if has logo (bonding and bonded tokens show logos)
   const hasLogo = type !== 'new' && !!data.logo;
@@ -140,6 +160,7 @@ function calculateBubble(
     address: data.address,
     priceChange: data.priceChange,
     createdAt: data.createdAt,
+    lastTradeIsBuy: data.lastTradeIsBuy,
   };
 }
 
@@ -152,30 +173,33 @@ function formatAge(ms: number): string {
   return `${minutes}m ${remainingSeconds}s`;
 }
 
+// Format time for slider display
+function formatTimeRange(ms: number): string {
+  const seconds = Math.floor(ms / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  return `${minutes}m`;
+}
+
 // Hover card component
 const HoverCard = memo(({ info, containerRect }: { info: HoverInfo; containerRect: DOMRect | null }) => {
   if (!containerRect) return null;
   
   const { bubble, mouseX, mouseY } = info;
   
-  // Position card near cursor but keep within bounds
   const cardWidth = 280;
   const cardHeight = 200;
   let left = mouseX + 15;
   let top = mouseY - cardHeight / 2;
   
-  // Adjust if would overflow right
   if (left + cardWidth > containerRect.width) {
     left = mouseX - cardWidth - 15;
   }
-  
-  // Adjust if would overflow top/bottom
   if (top < 0) top = 10;
   if (top + cardHeight > containerRect.height) {
     top = containerRect.height - cardHeight - 10;
   }
   
-  // Calculate current age for display
   const currentAge = Date.now() - bubble.createdAt;
   
   return (
@@ -183,7 +207,6 @@ const HoverCard = memo(({ info, containerRect }: { info: HoverInfo; containerRec
       className="absolute z-50 bg-bgContainer border border-borderDefault p-3 shadow-xl pointer-events-none"
       style={{ left, top, width: cardWidth }}
     >
-      {/* Header */}
       <div className="flex items-center gap-2 mb-2">
         {bubble.logo && (
           <div className={`relative ${bubble.isMigrated ? 'animate-pulse' : ''}`}>
@@ -201,7 +224,7 @@ const HoverCard = memo(({ info, containerRect }: { info: HoverInfo; containerRec
         )}
         {!bubble.logo && (
           <div 
-            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-black"
             style={{ backgroundColor: bubble.color }}
           >
             {bubble.symbol.slice(0, 2)}
@@ -211,12 +234,11 @@ const HoverCard = memo(({ info, containerRect }: { info: HoverInfo; containerRec
           <div className="text-textPrimary font-semibold text-sm truncate">{bubble.name}</div>
           <div className="text-textTertiary text-xs">${bubble.symbol}</div>
         </div>
-        <div className={`text-sm font-bold ${bubble.priceChange >= 0 ? 'text-success' : 'text-red-500'}`}>
-          {bubble.priceChange >= 0 ? '+' : ''}{bubble.priceChange.toFixed(2)}%
+        <div className={`text-sm font-bold ${bubble.lastTradeIsBuy ? 'text-success' : 'text-red-500'}`}>
+          {bubble.lastTradeIsBuy ? '↑ BUY' : '↓ SELL'}
         </div>
       </div>
       
-      {/* Stats grid */}
       <div className="grid grid-cols-2 gap-2 text-xs">
         <div className="bg-bgBase p-2">
           <div className="text-textTertiary">Market Cap</div>
@@ -233,12 +255,13 @@ const HoverCard = memo(({ info, containerRect }: { info: HoverInfo; containerRec
           </div>
         </div>
         <div className="bg-bgBase p-2">
-          <div className="text-textTertiary">Address</div>
-          <div className="text-textPrimary font-mono text-[10px] truncate">{bubble.address.slice(0, 8)}...</div>
+          <div className="text-textTertiary">24h Change</div>
+          <div className={`font-medium ${bubble.priceChange >= 0 ? 'text-success' : 'text-red-500'}`}>
+            {bubble.priceChange >= 0 ? '+' : ''}{bubble.priceChange.toFixed(1)}%
+          </div>
         </div>
       </div>
       
-      {/* Click hint */}
       <div className="mt-2 text-center text-textTertiary text-[10px]">
         Click to view details
       </div>
@@ -251,12 +274,13 @@ HoverCard.displayName = 'HoverCard';
 // Y-axis labels
 const YAxisLabels = memo(({ height }: { height: number }) => {
   const labels = [0, 25, 50, 75, 100];
-  const chartHeight = height - PADDING.top - PADDING.bottom;
+  const chartHeight = height - PADDING.top - PADDING.bottom - CHART_BOTTOM_MARGIN;
+  const yBase = height - PADDING.bottom - CHART_BOTTOM_MARGIN;
   
   return (
     <>
       {labels.map((val) => {
-        const y = height - PADDING.bottom - (val / 100) * chartHeight;
+        const y = yBase - (val / 100) * chartHeight;
         return (
           <text
             key={val}
@@ -276,30 +300,35 @@ const YAxisLabels = memo(({ height }: { height: number }) => {
 
 YAxisLabels.displayName = 'YAxisLabels';
 
-// X-axis labels
-const XAxisLabels = memo(({ width, height }: { width: number; height: number }) => {
-  const labels = [0, 1, 2, 3, 4, 5];
+// X-axis labels - dynamic based on maxAge
+const XAxisLabels = memo(({ width, height, maxAgeMs }: { width: number; height: number; maxAgeMs: number }) => {
+  const maxMinutes = maxAgeMs / 60000;
+  const numLabels = Math.min(6, Math.ceil(maxMinutes) + 1);
+  const step = maxMinutes / (numLabels - 1);
+  const labels = Array.from({ length: numLabels }, (_, i) => i * step);
+  
   const chartWidth = width - PADDING.left - PADDING.right;
   
   return (
     <>
-      {labels.map((min) => {
-        const x = PADDING.left + (min / 5) * chartWidth;
+      {labels.map((min, i) => {
+        const x = PADDING.left + (i / (numLabels - 1)) * chartWidth;
+        const label = min < 1 ? `${Math.round(min * 60)}s` : `${min.toFixed(min % 1 === 0 ? 0 : 1)}m`;
         return (
           <text
-            key={min}
+            key={i}
             x={x}
-            y={height - PADDING.bottom + 25}
+            y={height - PADDING.bottom + 35}
             className="fill-textTertiary text-xs"
             textAnchor="middle"
           >
-            {min}m
+            {label}
           </text>
         );
       })}
       <text
         x={width / 2}
-        y={height - 15}
+        y={height - 20}
         className="fill-textSecondary text-sm font-medium"
         textAnchor="middle"
       >
@@ -313,8 +342,9 @@ XAxisLabels.displayName = 'XAxisLabels';
 
 // Migration line
 const MigrationLine = memo(({ width, height }: { width: number; height: number }) => {
-  const chartHeight = height - PADDING.top - PADDING.bottom;
-  const y = height - PADDING.bottom - (MIGRATION_MCAP / MAX_MCAP) * chartHeight;
+  const chartHeight = height - PADDING.top - PADDING.bottom - CHART_BOTTOM_MARGIN;
+  const yBase = height - PADDING.bottom - CHART_BOTTOM_MARGIN;
+  const y = yBase - (MIGRATION_MCAP / MAX_MCAP) * chartHeight;
   
   return (
     <>
@@ -371,22 +401,116 @@ const StatsHeader = memo(({
 
 StatsHeader.displayName = 'StatsHeader';
 
-// Single bubble component with CSS animation for smooth movement
+// Timeline slider component
+const TimelineSlider = memo(({ 
+  value, 
+  onChange,
+  width 
+}: { 
+  value: number; 
+  onChange: (ms: number) => void;
+  width: number;
+}) => {
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  
+  const sliderWidth = Math.min(200, width - PADDING.left - PADDING.right - 100);
+  const sliderLeft = PADDING.left + 50;
+  
+  // Convert value to position (0-1)
+  const valueToPosition = (ms: number) => {
+    return (ms - MIN_TIME_MS) / (MAX_TIME_MS - MIN_TIME_MS);
+  };
+  
+  // Convert position to value
+  const positionToValue = (pos: number) => {
+    const clamped = Math.max(0, Math.min(1, pos));
+    return MIN_TIME_MS + clamped * (MAX_TIME_MS - MIN_TIME_MS);
+  };
+  
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+  
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging || !sliderRef.current) return;
+    
+    const rect = sliderRef.current.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    onChange(positionToValue(pos));
+  }, [isDragging, onChange]);
+  
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+  
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp]);
+  
+  const position = valueToPosition(value);
+  
+  return (
+    <div 
+      className="absolute flex items-center gap-2"
+      style={{ left: sliderLeft, bottom: PADDING.bottom - 60, width: sliderWidth + 80 }}
+    >
+      <span className="text-xs text-textTertiary w-8">30s</span>
+      <div
+        ref={sliderRef}
+        className="relative h-2 bg-bgContainer border border-borderDefault rounded-full cursor-pointer flex-1"
+        onMouseDown={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const pos = (e.clientX - rect.left) / rect.width;
+          onChange(positionToValue(pos));
+          setIsDragging(true);
+        }}
+      >
+        {/* Track fill */}
+        <div 
+          className="absolute top-0 left-0 h-full bg-success/30 rounded-full"
+          style={{ width: `${position * 100}%` }}
+        />
+        {/* Thumb */}
+        <div
+          className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-success rounded-full border-2 border-bgBase cursor-grab shadow-lg transition-transform ${isDragging ? 'scale-125 cursor-grabbing' : 'hover:scale-110'}`}
+          style={{ left: `calc(${position * 100}% - 8px)` }}
+          onMouseDown={handleMouseDown}
+        />
+      </div>
+      <span className="text-xs text-textTertiary w-8">10m</span>
+      <div className="ml-2 px-2 py-1 bg-success/20 border border-success/40 rounded text-xs text-success font-medium">
+        {formatTimeRange(value)}
+      </div>
+    </div>
+  );
+});
+
+TimelineSlider.displayName = 'TimelineSlider';
+
+// Single bubble component with CSS animation
 const TokenBubbleElement = memo(({ 
   bubble, 
   chartWidth,
+  maxAgeMs,
   isHovered 
 }: { 
   bubble: TokenBubble; 
   chartWidth: number;
+  maxAgeMs: number;
   isHovered: boolean;
 }) => {
-  // Calculate how much time remaining until token reaches 5 min
-  const remainingMs = MAX_AGE_MS - bubble.age;
-  const remainingPercent = remainingMs / MAX_AGE_MS;
+  const remainingMs = maxAgeMs - bubble.age;
+  const remainingPercent = remainingMs / maxAgeMs;
   const pixelsToMove = remainingPercent * chartWidth;
-  
-  // Animation duration = remaining time until 5 minutes
   const animationDuration = `${remainingMs}ms`;
   
   return (
@@ -395,7 +519,6 @@ const TokenBubbleElement = memo(({
       style={{
         transform: `translateX(0)`,
         animation: `moveRight ${animationDuration} linear forwards`,
-        // CSS custom property for the distance to move
         // @ts-ignore
         '--move-distance': `${pixelsToMove}px`,
       }}
@@ -470,6 +593,7 @@ export default function Garden() {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [hoverInfo, setHoverInfo] = useState<HoverInfo | null>(null);
   const [renderKey, setRenderKey] = useState(0);
+  const [maxAgeMs, setMaxAgeMs] = useState(DEFAULT_TIME_MS);
   
   // Get token data from store
   const newTokens = usePulseDataStore((state) => state.sections.new.tokens);
@@ -479,8 +603,7 @@ export default function Garden() {
   // Stream status
   const { isStreaming, hasInitialData } = usePulseStreamContext();
   
-  // Force re-render every 10 seconds to recalculate positions and remove old tokens
-  // But tokens move smoothly via CSS animation between re-renders
+  // Force re-render every 10 seconds
   useEffect(() => {
     const interval = setInterval(() => setRenderKey(k => k + 1), 10000);
     return () => clearInterval(interval);
@@ -505,19 +628,17 @@ export default function Garden() {
     return () => observer.disconnect();
   }, []);
   
-  // Calculate bubbles - only pump tokens
+  // Calculate bubbles - only pump tokens, filter out >100k mcap
   const bubbles = useMemo(() => {
     if (dimensions.width === 0 || dimensions.height === 0) return [];
     
     const allBubbles: TokenBubble[] = [];
     
-    // Process each category - filter for pump tokens only
     const processTokens = (tokens: PulseToken[], type: ViewName) => {
       for (const token of tokens) {
-        // Filter: only pump tokens
         if (!isPumpToken(token)) continue;
         
-        const bubble = calculateBubble(token, type, dimensions.width, dimensions.height);
+        const bubble = calculateBubble(token, type, dimensions.width, dimensions.height, maxAgeMs);
         if (bubble) allBubbles.push(bubble);
       }
     };
@@ -527,12 +648,10 @@ export default function Garden() {
     processTokens(bondedTokens, 'bonded');
     
     return allBubbles;
-  }, [newTokens, bondingTokens, bondedTokens, dimensions, renderKey]);
+  }, [newTokens, bondingTokens, bondedTokens, dimensions, renderKey, maxAgeMs]);
   
-  // Chart width for animation calculation
   const chartWidth = dimensions.width - PADDING.left - PADDING.right;
   
-  // Counts for header
   const counts = useMemo(() => ({
     new: bubbles.filter(b => b.type === 'new').length,
     bonding: bubbles.filter(b => b.type === 'bonding').length,
@@ -547,13 +666,10 @@ export default function Garden() {
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
     
-    // Find bubble under cursor (check with animation offset)
     let foundBubble: TokenBubble | null = null;
     for (const bubble of bubbles) {
-      // Calculate current animated X position
-      const elapsed = Date.now() - (Date.now() - bubble.age);
       const currentAge = Date.now() - bubble.createdAt;
-      const currentX = PADDING.left + (currentAge / MAX_AGE_MS) * chartWidth;
+      const currentX = PADDING.left + (currentAge / maxAgeMs) * chartWidth;
       
       const dx = mouseX - currentX;
       const dy = mouseY - bubble.y;
@@ -569,7 +685,7 @@ export default function Garden() {
     } else {
       setHoverInfo(null);
     }
-  }, [bubbles, chartWidth]);
+  }, [bubbles, chartWidth, maxAgeMs]);
   
   const handleMouseLeave = useCallback(() => {
     setHoverInfo(null);
@@ -578,7 +694,8 @@ export default function Garden() {
   const handleClick = useCallback((e: React.MouseEvent) => {
     if (hoverInfo) {
       e.preventDefault();
-      window.open(`/token/${hoverInfo.bubble.address}`, '_blank');
+      // Correct route format: /token/solana:solana/ADDRESS
+      window.open(`/token/solana:solana/${hoverInfo.bubble.address}`, '_blank');
     }
   }, [hoverInfo]);
   
@@ -595,16 +712,10 @@ export default function Garden() {
       {/* CSS for smooth animation */}
       <style jsx global>{`
         @keyframes moveRight {
-          from {
-            transform: translateX(0);
-          }
-          to {
-            transform: translateX(var(--move-distance, 0));
-          }
+          from { transform: translateX(0); }
+          to { transform: translateX(var(--move-distance, 0)); }
         }
-        .token-bubble {
-          will-change: transform;
-        }
+        .token-bubble { will-change: transform; }
       `}</style>
       
       {/* Stats header */}
@@ -623,6 +734,15 @@ export default function Garden() {
         <span className="text-xs text-textTertiary ml-2">PUMP.FUN</span>
       </div>
       
+      {/* Timeline slider */}
+      {dimensions.width > 0 && (
+        <TimelineSlider 
+          value={maxAgeMs} 
+          onChange={setMaxAgeMs}
+          width={dimensions.width}
+        />
+      )}
+      
       {/* SVG Chart */}
       {dimensions.width > 0 && dimensions.height > 0 && (
         <svg width={dimensions.width} height={dimensions.height} className="absolute inset-0">
@@ -636,23 +756,24 @@ export default function Garden() {
             x={PADDING.left} 
             y={PADDING.top} 
             width={dimensions.width - PADDING.left - PADDING.right}
-            height={dimensions.height - PADDING.top - PADDING.bottom}
+            height={dimensions.height - PADDING.top - PADDING.bottom - CHART_BOTTOM_MARGIN}
             fill="url(#grid)" 
           />
           
           {/* Axis labels */}
           <YAxisLabels height={dimensions.height} />
-          <XAxisLabels width={dimensions.width} height={dimensions.height} />
+          <XAxisLabels width={dimensions.width} height={dimensions.height} maxAgeMs={maxAgeMs} />
           
           {/* Migration line */}
           <MigrationLine width={dimensions.width} height={dimensions.height} />
           
-          {/* Bubbles with smooth animation */}
+          {/* Bubbles */}
           {bubbles.map((bubble) => (
             <TokenBubbleElement
               key={`${bubble.type}-${bubble.address}`}
               bubble={bubble}
               chartWidth={chartWidth}
+              maxAgeMs={maxAgeMs}
               isHovered={hoverInfo?.bubble.address === bubble.address}
             />
           ))}
