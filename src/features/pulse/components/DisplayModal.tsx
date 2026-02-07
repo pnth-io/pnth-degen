@@ -79,8 +79,7 @@ export default function DisplayModal({ isOpen, onClose }: DisplayModalProps) {
 
       {/* Modal */}
       <div
-        className="absolute top-full mt-2 w-80 max-w-[90vw] bg-bgPrimary border border-borderDefault shadow-xl z-50 p-4 pnth-card"
-        style={{ right: 0 }}
+        className="absolute top-full right-0 mt-2 w-80 max-w-[90vw] bg-bgPrimary border border-borderDefault shadow-xl z-50 p-4 pnth-card"
         ref={modalRef}
       >
         {/* Metric Size */}
