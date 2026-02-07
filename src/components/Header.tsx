@@ -1,13 +1,13 @@
 'use client';
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { ApiSelectorDropdown } from './header/ApiSelectorDropdown';
 
-
 const SearchModal = dynamic(() => import('./SearchModal').then(mod => ({ default: mod.SearchModal })), { ssr: false });
-const NetworkDebuggerModal = dynamic(() => import('./NetworkDebuggerModal').then(mod => ({ default: mod.NetworkDebuggerModal })), { ssr: false });
 
 import { FiSearch } from 'react-icons/fi';
+import { MenuIcon } from '@/assets/icons/MenuIcon';
+import { ChevronDown } from 'lucide-react';
 import { useApiStore } from '@/store/apiStore';
 import { useHeaderStore } from '@/store/useHeaderStore';
 import { initMobulaClient } from '@/lib/mobulaClient';
@@ -16,30 +16,24 @@ import SafeImage from '@/components/SafeImage';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { MobileWarningBanner } from '@/components/MobileWarningBanner';
+import DisplayModal from '@/features/pulse/components/DisplayModal';
 
 const Header = () => {
   const apiButtonRef = useRef<HTMLButtonElement>(null);
   const latencyIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
+  const [isDisplayOpen, setDisplayOpen] = useState(false);
 
   const { currentUrl, getLabelForUrl } = useApiStore();
 
-  
-  
   const {
     isSearchOpen,
     isApiSelectorOpen,
-    isNetworkDebuggerOpen,
-    isWalletModalOpen,
     latency,
     openSearch,
     closeSearch,
     toggleApiSelector,
     closeApiSelector,
-    openNetworkDebugger,
-    closeNetworkDebugger,
-    openWalletModal,
-    closeWalletModal,
     setLatency,
   } = useHeaderStore();
 
@@ -56,10 +50,8 @@ const Header = () => {
       const latencyMs = Math.round(end - start);
       const newLatency = `${latencyMs}ms`;
       
-      // Get current latency from store without creating dependency
       const currentLatency = useHeaderStore.getState().latency;
       
-      // Only update if latency changed to avoid unnecessary re-renders
       if (currentLatency !== newLatency) {
         setLatency(newLatency);
       }
@@ -68,7 +60,6 @@ const Header = () => {
     }
   }, [currentUrl, setLatency]);
 
-  // Periodically check latency
   useEffect(() => {
     checkLatency();
     latencyIntervalRef.current = setInterval(checkLatency, 10000);
@@ -103,7 +94,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="w-full bg-bgBase/90 backdrop-blur-md text-white border-b border-borderDefault">
+      <header className="w-full bg-bgBase/90 text-white border-b border-borderDefault">
         <div className="flex items-center h-14 sm:h-16 justify-between px-3 sm:px-4">
           {/* Left side: Logo, Search, Nav */}
           <div className="flex items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 flex-1 min-w-0">
@@ -112,9 +103,9 @@ const Header = () => {
               <SafeImage
                 src="/pantheon-logo.svg"
                 alt="Pantheon Logo"
-                width={36}
+                width={120}
                 height={36}
-                className="w-8 h-8 sm:w-9 sm:h-9 transition-all group-hover:drop-shadow-[0_0_12px_rgba(97,202,135,0.6)]"
+                className="h-7 sm:h-8 w-auto transition-all group-hover:drop-shadow-[0_0_12px_rgba(97,202,135,0.6)]"
                 priority
               />
             </Link>
@@ -171,22 +162,29 @@ const Header = () => {
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 lg:gap-4 text-sm flex-shrink-0">
-            <button
-              onClick={openNetworkDebugger}
-              className="hidden xl:inline-flex items-center gap-2 text-textTertiary hover:text-success text-xs px-3 py-1.5 hover:bg-success/10 rounded-md transition whitespace-nowrap border border-transparent hover:border-success/30"
-            >
-              Get data
-            </button>
+            {/* Display Dropdown */}
+            <div className="relative hidden md:block">
+              <button
+                type="button"
+                className="pnth-button-outline flex items-center px-4 space-x-2 h-8 py-1.5 cursor-pointer"
+                onClick={() => setDisplayOpen((open) => !open)}
+              >
+                <MenuIcon />
+                <span className="mr-2 text-sm text-textPrimary font-bold">Display</span>
+                <ChevronDown className="h-4 w-4 text-textPrimary" />
+              </button>
+              <DisplayModal isOpen={isDisplayOpen} onClose={() => setDisplayOpen(false)} />
+            </div>
 
             <div className="flex-shrink-0">
-            <LatencyIndicator
-              currentUrl={currentUrl}
-              latency={latency}
-              isApiSelectorOpen={isApiSelectorOpen}
-              toggleSelector={toggleApiSelector}
-              buttonRef={apiButtonRef}
-              getLabelForUrl={getLabelForUrl}
-            />
+              <LatencyIndicator
+                currentUrl={currentUrl}
+                latency={latency}
+                isApiSelectorOpen={isApiSelectorOpen}
+                toggleSelector={toggleApiSelector}
+                buttonRef={apiButtonRef}
+                getLabelForUrl={getLabelForUrl}
+              />
             </div>
           </div>
         </div>
@@ -199,10 +197,6 @@ const Header = () => {
         isOpen={isApiSelectorOpen}
         onClose={closeApiSelector}
         buttonRef={apiButtonRef}
-      />
-      <NetworkDebuggerModal
-        isOpen={isNetworkDebuggerOpen}
-        onClose={closeNetworkDebugger}
       />
     </>
   );

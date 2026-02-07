@@ -1,7 +1,6 @@
 'use client';
 
 import { TokenSectionSkeleton } from '@/components/skeleton';
-import PulseHeader from '@/features/pulse/components/PulseHeader';
 import TokenSection from '@/features/pulse/components/TokenSection';
 import { PulseStreamProvider, usePulseStreamContext } from '@/features/pulse/context/PulseStreamContext';
 import { usePulseDisplayStore } from '@/features/pulse/store/usePulseDisplayStore';
@@ -23,7 +22,7 @@ const PulseView = () => {
             className={`overflow-hidden ${
               compactTables
                 ? 'pnth-card'
-                : 'pnth-table-container border-x-[1px] border-b'
+                : 'pnth-table-container border-t border-x-[1px] border-b'
             }`}
           >
             <TokenSectionSkeleton title="New Pairs" />
@@ -34,7 +33,7 @@ const PulseView = () => {
             className={`overflow-hidden ${
               compactTables
                 ? 'pnth-card'
-                : 'pnth-table-container border-r border-b'
+                : 'pnth-table-container border-t border-r border-b'
             }`}
           >
             <TokenSectionSkeleton title="Final Stretch" />
@@ -45,7 +44,7 @@ const PulseView = () => {
             className={`overflow-hidden ${
               compactTables
                 ? 'pnth-card'
-                : 'pnth-table-container border-r border-b'
+                : 'pnth-table-container border-t border-r border-b'
             }`}
           >
             <TokenSectionSkeleton title="Migrated" />
@@ -58,7 +57,7 @@ const PulseView = () => {
             className={`overflow-hidden ${
               compactTables
                 ? 'pnth-card'
-                : 'pnth-table-container border-x-[1px] border-b'
+                : 'pnth-table-container border-t border-x-[1px] border-b'
             }`}
           >
             <TokenSection
@@ -74,7 +73,7 @@ const PulseView = () => {
             className={`overflow-hidden ${
               compactTables
                 ? 'pnth-card'
-                : 'pnth-table-container border-r border-b'
+                : 'pnth-table-container border-t border-r border-b'
             }`}
           >
             <TokenSection
@@ -90,7 +89,7 @@ const PulseView = () => {
             className={`overflow-hidden ${
               compactTables
                 ? 'pnth-card'
-                : 'pnth-table-container border-r border-b'
+                : 'pnth-table-container border-t border-r border-b'
             }`}
           >
             <TokenSection
@@ -119,18 +118,6 @@ const PulsePageView = () => {
 
   return (
     <div className="bg-transparent">
-      {/* Header */}
-      <div className="px-4 pt-3 pb-0">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-textPrimary">Pulse</h1>
-          <PulseHeader />
-        </div>
-        
-        {/* Border line */}
-        <div className="border-b border-borderDefault -mx-4 mt-3" />
-      </div>
-      
-      {/* Content */}
       <PulseView />
     </div>
   );
