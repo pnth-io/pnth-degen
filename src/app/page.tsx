@@ -11,7 +11,7 @@ const PulseView = () => {
 
   return (
     <div
-      className={`px-4 md:grid md:grid-cols-3 md:grid-rows-[1fr] p-0 flex-1 pt-2 mb-10 min-h-0 ${
+      className={`px-4 md:grid md:grid-cols-3 h-full pt-2 pb-2 ${
         compactTables ? 'gap-3 p-2' : 'gap-0'
       }`}
     >
@@ -117,7 +117,7 @@ const PulsePageView = () => {
   }
 
   return (
-    <div className="bg-transparent flex flex-col flex-1 h-full">
+    <div className="bg-transparent h-full">
       <PulseView />
     </div>
   );

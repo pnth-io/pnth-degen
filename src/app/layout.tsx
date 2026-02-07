@@ -51,7 +51,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <header className="sticky top-0 z-50">
               <Header />
             </header>
-            <main className="flex-1 flex flex-col overflow-hidden pb-10">
+            <main className="flex flex-col overflow-hidden" style={{ height: 'calc(100vh - 64px - 40px)' }}>
               {children}
             </main>
             <footer className="sticky bottom-0 z-50">
