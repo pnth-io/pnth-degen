@@ -5,7 +5,6 @@ import { usePulseDataStore, type PulseToken, type ViewName } from '@/features/pu
 import { usePulseStreamContext } from '@/features/pulse/context/PulseStreamContext';
 import SafeImage from '@/components/SafeImage';
 import { formatCryptoPrice } from '@mobula_labs/sdk';
-import Link from 'next/link';
 
 // Constants
 const MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
@@ -14,6 +13,9 @@ const MIGRATION_MCAP = 35_000; // $35k migration line
 const MIN_BUBBLE_SIZE = 8;
 const MAX_BUBBLE_SIZE = 40;
 const PADDING = { top: 60, right: 40, bottom: 60, left: 80 };
+
+// Pump protocol identifiers
+const PUMP_PROTOCOLS = ['pumpfun', 'pump.fun', 'pump', 'pumpswap'];
 
 interface TokenBubble {
   token: PulseToken;
@@ -31,12 +33,24 @@ interface TokenBubble {
   age: number;
   address: string;
   priceChange: number;
+  createdAt: number;
 }
 
 interface HoverInfo {
   bubble: TokenBubble;
   mouseX: number;
   mouseY: number;
+}
+
+// Check if token is from pump protocol
+function isPumpToken(token: PulseToken): boolean {
+  const flat = token?.token?.address ? token.token : token;
+  const data = flat as Record<string, unknown>;
+  
+  const source = ((data.source || data.preBondingFactory || '') as string).toLowerCase();
+  
+  // Check if source contains pump
+  return PUMP_PROTOCOLS.some(p => source.includes(p)) || source === '';
 }
 
 // Extract token data helper
@@ -68,15 +82,15 @@ function extractTokenData(token: PulseToken): {
   };
 }
 
-// Calculate bubble properties
+// Calculate bubble properties - X position based on creation time, not current time
 function calculateBubble(
   token: PulseToken,
   type: ViewName,
   containerWidth: number,
-  containerHeight: number,
-  now: number
+  containerHeight: number
 ): TokenBubble | null {
   const data = extractTokenData(token);
+  const now = Date.now();
   
   // Calculate age in ms
   const referenceTime = type === 'bonded' && data.bondedAt ? data.bondedAt : data.createdAt;
@@ -88,9 +102,10 @@ function calculateBubble(
   // Cap market cap at MAX_MCAP for visualization
   const cappedMcap = Math.min(data.marketCap, MAX_MCAP);
   
-  // Calculate X position (time: 0 = left, 5min = right)
+  // Calculate X position based on age (tokens move right as they age)
   const chartWidth = containerWidth - PADDING.left - PADDING.right;
-  const x = PADDING.left + (age / MAX_AGE_MS) * chartWidth;
+  const xPercent = age / MAX_AGE_MS; // 0 = just created, 1 = 5 min old
+  const x = PADDING.left + xPercent * chartWidth;
   
   // Calculate Y position (mcap: 0 = bottom, 100k = top)
   const chartHeight = containerHeight - PADDING.top - PADDING.bottom;
@@ -124,6 +139,7 @@ function calculateBubble(
     age,
     address: data.address,
     priceChange: data.priceChange,
+    createdAt: data.createdAt,
   };
 }
 
@@ -158,6 +174,9 @@ const HoverCard = memo(({ info, containerRect }: { info: HoverInfo; containerRec
   if (top + cardHeight > containerRect.height) {
     top = containerRect.height - cardHeight - 10;
   }
+  
+  // Calculate current age for display
+  const currentAge = Date.now() - bubble.createdAt;
   
   return (
     <div
@@ -205,7 +224,7 @@ const HoverCard = memo(({ info, containerRect }: { info: HoverInfo; containerRec
         </div>
         <div className="bg-bgBase p-2">
           <div className="text-textTertiary">Age</div>
-          <div className="text-textPrimary font-medium">{formatAge(bubble.age)}</div>
+          <div className="text-textPrimary font-medium">{formatAge(currentAge)}</div>
         </div>
         <div className="bg-bgBase p-2">
           <div className="text-textTertiary">Status</div>
@@ -352,12 +371,105 @@ const StatsHeader = memo(({
 
 StatsHeader.displayName = 'StatsHeader';
 
+// Single bubble component with CSS animation for smooth movement
+const TokenBubbleElement = memo(({ 
+  bubble, 
+  chartWidth,
+  isHovered 
+}: { 
+  bubble: TokenBubble; 
+  chartWidth: number;
+  isHovered: boolean;
+}) => {
+  // Calculate how much time remaining until token reaches 5 min
+  const remainingMs = MAX_AGE_MS - bubble.age;
+  const remainingPercent = remainingMs / MAX_AGE_MS;
+  const pixelsToMove = remainingPercent * chartWidth;
+  
+  // Animation duration = remaining time until 5 minutes
+  const animationDuration = `${remainingMs}ms`;
+  
+  return (
+    <g 
+      className="token-bubble"
+      style={{
+        transform: `translateX(0)`,
+        animation: `moveRight ${animationDuration} linear forwards`,
+        // CSS custom property for the distance to move
+        // @ts-ignore
+        '--move-distance': `${pixelsToMove}px`,
+      }}
+    >
+      {/* Fire effect for migrated */}
+      {bubble.isMigrated && (
+        <circle
+          cx={bubble.x}
+          cy={bubble.y}
+          r={bubble.size / 2 + 4}
+          fill="none"
+          stroke="#f97316"
+          strokeWidth={2}
+          opacity={0.6}
+          className="animate-pulse"
+        />
+      )}
+      
+      {/* Main bubble */}
+      {bubble.hasLogo && bubble.logo ? (
+        <foreignObject
+          x={bubble.x - bubble.size / 2}
+          y={bubble.y - bubble.size / 2}
+          width={bubble.size}
+          height={bubble.size}
+        >
+          <div 
+            className={`w-full h-full rounded-full overflow-hidden border-2 transition-transform duration-200 ${isHovered ? 'scale-125' : ''}`}
+            style={{ borderColor: bubble.color }}
+          >
+            <SafeImage
+              src={bubble.logo}
+              alt={bubble.name}
+              width={bubble.size}
+              height={bubble.size}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </foreignObject>
+      ) : (
+        <circle
+          cx={bubble.x}
+          cy={bubble.y}
+          r={bubble.size / 2}
+          fill={bubble.color}
+          opacity={0.8}
+          className={`transition-transform duration-200 ${isHovered ? 'scale-125' : ''}`}
+          style={{ transformOrigin: `${bubble.x}px ${bubble.y}px` }}
+        />
+      )}
+      
+      {/* Label for larger bubbles */}
+      {bubble.size > 20 && (
+        <text
+          x={bubble.x}
+          y={bubble.y + bubble.size / 2 + 12}
+          className="fill-textSecondary text-[10px]"
+          textAnchor="middle"
+        >
+          {bubble.symbol}
+        </text>
+      )}
+    </g>
+  );
+});
+
+TokenBubbleElement.displayName = 'TokenBubbleElement';
+
 // Main Garden component
 export default function Garden() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [hoverInfo, setHoverInfo] = useState<HoverInfo | null>(null);
-  const [now, setNow] = useState(Date.now());
+  const [renderKey, setRenderKey] = useState(0);
   
   // Get token data from store
   const newTokens = usePulseDataStore((state) => state.sections.new.tokens);
@@ -367,9 +479,10 @@ export default function Garden() {
   // Stream status
   const { isStreaming, hasInitialData } = usePulseStreamContext();
   
-  // Update time every second for smooth animation
+  // Force re-render every 10 seconds to recalculate positions and remove old tokens
+  // But tokens move smoothly via CSS animation between re-renders
   useEffect(() => {
-    const interval = setInterval(() => setNow(Date.now()), 1000);
+    const interval = setInterval(() => setRenderKey(k => k + 1), 10000);
     return () => clearInterval(interval);
   }, []);
   
@@ -392,16 +505,19 @@ export default function Garden() {
     return () => observer.disconnect();
   }, []);
   
-  // Calculate bubbles
+  // Calculate bubbles - only pump tokens
   const bubbles = useMemo(() => {
     if (dimensions.width === 0 || dimensions.height === 0) return [];
     
     const allBubbles: TokenBubble[] = [];
     
-    // Process each category
+    // Process each category - filter for pump tokens only
     const processTokens = (tokens: PulseToken[], type: ViewName) => {
       for (const token of tokens) {
-        const bubble = calculateBubble(token, type, dimensions.width, dimensions.height, now);
+        // Filter: only pump tokens
+        if (!isPumpToken(token)) continue;
+        
+        const bubble = calculateBubble(token, type, dimensions.width, dimensions.height);
         if (bubble) allBubbles.push(bubble);
       }
     };
@@ -411,7 +527,10 @@ export default function Garden() {
     processTokens(bondedTokens, 'bonded');
     
     return allBubbles;
-  }, [newTokens, bondingTokens, bondedTokens, dimensions, now]);
+  }, [newTokens, bondingTokens, bondedTokens, dimensions, renderKey]);
+  
+  // Chart width for animation calculation
+  const chartWidth = dimensions.width - PADDING.left - PADDING.right;
   
   // Counts for header
   const counts = useMemo(() => ({
@@ -428,13 +547,18 @@ export default function Garden() {
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
     
-    // Find bubble under cursor
+    // Find bubble under cursor (check with animation offset)
     let foundBubble: TokenBubble | null = null;
     for (const bubble of bubbles) {
-      const dx = mouseX - bubble.x;
+      // Calculate current animated X position
+      const elapsed = Date.now() - (Date.now() - bubble.age);
+      const currentAge = Date.now() - bubble.createdAt;
+      const currentX = PADDING.left + (currentAge / MAX_AGE_MS) * chartWidth;
+      
+      const dx = mouseX - currentX;
       const dy = mouseY - bubble.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      if (distance <= bubble.size / 2 + 5) {
+      if (distance <= bubble.size / 2 + 8) {
         foundBubble = bubble;
         break;
       }
@@ -445,7 +569,7 @@ export default function Garden() {
     } else {
       setHoverInfo(null);
     }
-  }, [bubbles]);
+  }, [bubbles, chartWidth]);
   
   const handleMouseLeave = useCallback(() => {
     setHoverInfo(null);
@@ -468,6 +592,21 @@ export default function Garden() {
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
     >
+      {/* CSS for smooth animation */}
+      <style jsx global>{`
+        @keyframes moveRight {
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(var(--move-distance, 0));
+          }
+        }
+        .token-bubble {
+          will-change: transform;
+        }
+      `}</style>
+      
       {/* Stats header */}
       <StatsHeader 
         newCount={counts.new} 
@@ -481,6 +620,7 @@ export default function Garden() {
         <span className={`text-xs ${isStreaming ? 'text-success' : 'text-yellow-500'}`}>
           {isStreaming ? 'LIVE' : 'CONNECTING'}
         </span>
+        <span className="text-xs text-textTertiary ml-2">PUMP.FUN</span>
       </div>
       
       {/* SVG Chart */}
@@ -507,64 +647,14 @@ export default function Garden() {
           {/* Migration line */}
           <MigrationLine width={dimensions.width} height={dimensions.height} />
           
-          {/* Bubbles */}
+          {/* Bubbles with smooth animation */}
           {bubbles.map((bubble) => (
-            <g key={`${bubble.type}-${bubble.address}`}>
-              {/* Fire effect for migrated */}
-              {bubble.isMigrated && (
-                <circle
-                  cx={bubble.x}
-                  cy={bubble.y}
-                  r={bubble.size / 2 + 4}
-                  fill="none"
-                  stroke="#f97316"
-                  strokeWidth={2}
-                  opacity={0.6}
-                  className="animate-pulse"
-                />
-              )}
-              
-              {/* Main bubble */}
-              {bubble.hasLogo && bubble.logo ? (
-                <foreignObject
-                  x={bubble.x - bubble.size / 2}
-                  y={bubble.y - bubble.size / 2}
-                  width={bubble.size}
-                  height={bubble.size}
-                >
-                  <div className="w-full h-full rounded-full overflow-hidden border-2" style={{ borderColor: bubble.color }}>
-                    <SafeImage
-                      src={bubble.logo}
-                      alt={bubble.name}
-                      width={bubble.size}
-                      height={bubble.size}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </foreignObject>
-              ) : (
-                <circle
-                  cx={bubble.x}
-                  cy={bubble.y}
-                  r={bubble.size / 2}
-                  fill={bubble.color}
-                  opacity={0.8}
-                  className="transition-all duration-300"
-                />
-              )}
-              
-              {/* Label for larger bubbles */}
-              {bubble.size > 20 && (
-                <text
-                  x={bubble.x}
-                  y={bubble.y + bubble.size / 2 + 12}
-                  className="fill-textSecondary text-[10px]"
-                  textAnchor="middle"
-                >
-                  {bubble.symbol}
-                </text>
-              )}
-            </g>
+            <TokenBubbleElement
+              key={`${bubble.type}-${bubble.address}`}
+              bubble={bubble}
+              chartWidth={chartWidth}
+              isHovered={hoverInfo?.bubble.address === bubble.address}
+            />
           ))}
         </svg>
       )}
