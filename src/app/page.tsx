@@ -11,15 +11,16 @@ const PulseView = () => {
 
   return (
     <div
-      className={`px-4 md:grid md:grid-cols-3 p-0 flex-1 pt-2 pb-2 h-full ${
+      className={`px-4 md:grid md:grid-cols-3 md:grid-rows-[1fr] p-0 flex-1 pt-2 pb-2 ${
         compactTables ? 'gap-3 p-2' : 'gap-0'
       }`}
+      style={{ height: 'calc(100vh - 120px)' }}
     >
       {loading ? (
         <>
           {/* NEW PAIRS SECTION SKELETON */}
           <div
-            className={`overflow-hidden ${
+            className={`overflow-hidden h-full ${
               compactTables
                 ? 'pnth-card'
                 : 'pnth-table-container border-t border-x-[1px] border-b'
@@ -30,7 +31,7 @@ const PulseView = () => {
 
           {/* FINAL STRETCH SECTION SKELETON */}
           <div
-            className={`overflow-hidden ${
+            className={`overflow-hidden h-full ${
               compactTables
                 ? 'pnth-card'
                 : 'pnth-table-container border-t border-r border-b'
@@ -41,7 +42,7 @@ const PulseView = () => {
 
           {/* MIGRATED SECTION SKELETON */}
           <div
-            className={`overflow-hidden ${
+            className={`overflow-hidden h-full ${
               compactTables
                 ? 'pnth-card'
                 : 'pnth-table-container border-t border-r border-b'
@@ -54,7 +55,7 @@ const PulseView = () => {
         <>
           {/* NEW PAIRS SECTION */}
           <div
-            className={`overflow-hidden ${
+            className={`overflow-hidden h-full ${
               compactTables
                 ? 'pnth-card'
                 : 'pnth-table-container border-t border-x-[1px] border-b'
@@ -70,7 +71,7 @@ const PulseView = () => {
 
           {/* FINAL STRETCH SECTION */}
           <div
-            className={`overflow-hidden ${
+            className={`overflow-hidden h-full ${
               compactTables
                 ? 'pnth-card'
                 : 'pnth-table-container border-t border-r border-b'
@@ -86,7 +87,7 @@ const PulseView = () => {
 
           {/* MIGRATED SECTION */}
           <div
-            className={`overflow-hidden ${
+            className={`overflow-hidden h-full ${
               compactTables
                 ? 'pnth-card'
                 : 'pnth-table-container border-t border-r border-b'
