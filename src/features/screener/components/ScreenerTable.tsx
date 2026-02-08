@@ -82,13 +82,13 @@ const TokenRow = memo(({ token, index }: { token: ScreenerToken; index: number }
   return (
     <Link 
       href={`/pair/solana/${token.pairAddress}`}
-      className="flex items-center gap-2 px-3 py-2 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0"
+      className="flex items-center gap-2 px-3 py-2 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 min-w-[600px]"
     >
       {/* Rank */}
       <span className="text-xs text-gray-500 w-6 shrink-0">#{index + 1}</span>
       
       {/* Token Info */}
-      <div className="flex items-center gap-2 min-w-0 flex-1">
+      <div className="flex items-center gap-2 w-32 shrink-0">
         {token.logo ? (
           <Image
             src={token.logo}
@@ -105,40 +105,40 @@ const TokenRow = memo(({ token, index }: { token: ScreenerToken; index: number }
         )}
         <div className="min-w-0">
           <p className="text-sm font-medium text-white truncate">{token.symbol}</p>
-          <p className="text-[10px] text-gray-500 truncate">{token.name}</p>
+          <p className="text-[10px] text-gray-500 truncate max-w-[80px]">{token.name}</p>
         </div>
       </div>
       
-      {/* Price - Hidden on mobile */}
-      <div className="hidden sm:block w-20 text-right">
+      {/* Price */}
+      <div className="w-20 text-right shrink-0">
         <p className="text-xs text-white font-mono">${formatPrice(token.price)}</p>
       </div>
       
       {/* Price Changes */}
-      <div className="flex gap-3 shrink-0">
-        <div className="w-14 text-right hidden md:block">
+      <div className="flex gap-2 shrink-0">
+        <div className="w-14 text-right">
           <PriceChange value={token.priceChange5m} />
         </div>
         <div className="w-14 text-right">
           <PriceChange value={token.priceChange1h} />
         </div>
-        <div className="w-14 text-right hidden sm:block">
+        <div className="w-14 text-right">
           <PriceChange value={token.priceChange24h} />
         </div>
       </div>
       
       {/* Volume */}
-      <div className="w-16 text-right hidden sm:block">
+      <div className="w-16 text-right shrink-0">
         <p className="text-xs text-white font-mono">${formatNumber(token.volume24h, 1)}</p>
       </div>
       
-      {/* Liquidity - Hidden on mobile */}
-      <div className="w-16 text-right hidden md:block">
+      {/* Liquidity */}
+      <div className="w-16 text-right shrink-0">
         <p className="text-xs text-white font-mono">${formatNumber(token.liquidity, 1)}</p>
       </div>
       
       {/* Txns */}
-      <div className="w-12 text-right">
+      <div className="w-14 text-right shrink-0">
         <p className="text-xs text-gray-300 font-mono">{token.trades24h}</p>
         <p className="text-[10px] text-gray-500">
           <span className="text-green-400">{token.buys24h}</span>
@@ -148,66 +148,13 @@ const TokenRow = memo(({ token, index }: { token: ScreenerToken; index: number }
       </div>
       
       {/* Age */}
-      <div className="w-10 text-right">
+      <div className="w-10 text-right shrink-0">
         <p className="text-xs text-gray-400">{formatAge(token.createdAt)}</p>
       </div>
     </Link>
   );
 });
 TokenRow.displayName = 'TokenRow';
-
-const MobileTokenCard = memo(({ token, index }: { token: ScreenerToken; index: number }) => {
-  return (
-    <Link 
-      href={`/pair/solana/${token.pairAddress}`}
-      className="block p-3 hover:bg-white/5 transition-colors border-b border-white/5"
-    >
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">#{index + 1}</span>
-          {token.logo ? (
-            <Image
-              src={token.logo}
-              alt={token.symbol}
-              width={20}
-              height={20}
-              className="rounded-full"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          ) : (
-            <div className="w-5 h-5 rounded-full bg-gray-700" />
-          )}
-          <span className="text-sm font-medium text-white">{token.symbol}</span>
-        </div>
-        <span className="text-xs text-gray-400">{formatAge(token.createdAt)}</span>
-      </div>
-      
-      <div className="flex items-center justify-between text-xs">
-        <span className="text-white font-mono">${formatPrice(token.price)}</span>
-        <div className="flex gap-3">
-          <div className="text-center">
-            <p className="text-[10px] text-gray-500">1h</p>
-            <PriceChange value={token.priceChange1h} />
-          </div>
-          <div className="text-center">
-            <p className="text-[10px] text-gray-500">24h</p>
-            <PriceChange value={token.priceChange24h} />
-          </div>
-        </div>
-      </div>
-      
-      <div className="flex items-center justify-between text-[10px] text-gray-500 mt-2">
-        <span>Vol: ${formatNumber(token.volume24h, 1)}</span>
-        <span>Liq: ${formatNumber(token.liquidity, 1)}</span>
-        <span className="text-green-400">{token.buys24h}B</span>
-        <span className="text-red-400">{token.sells24h}S</span>
-      </div>
-    </Link>
-  );
-});
-MobileTokenCard.displayName = 'MobileTokenCard';
 
 export const ScreenerTable = memo(function ScreenerTable({ 
   tokens, 
@@ -238,50 +185,31 @@ export const ScreenerTable = memo(function ScreenerTable({
 
   return (
     <div className="h-full overflow-hidden flex flex-col">
-      {/* Desktop Header */}
-      <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-black/30 border-b border-white/10 shrink-0">
+      {/* Header */}
+      <div className="flex items-center gap-2 px-3 py-2 bg-black/30 border-b border-white/10 shrink-0 min-w-[600px]">
         <span className="w-6 shrink-0"></span>
-        <div className="flex-1 min-w-0">
+        <div className="w-32 shrink-0">
           <span className="text-xs text-gray-400">Token</span>
         </div>
-        <div className="hidden sm:block w-20 text-right">
+        <div className="w-20 text-right shrink-0">
           <span className="text-xs text-gray-400">Price</span>
         </div>
-        <div className="flex gap-3 shrink-0">
-          <SortHeader label="5m" field="priceChange5m" currentField={sortField} direction={sortDirection} onSort={handleSort} className="w-14 justify-end hidden md:flex" />
+        <div className="flex gap-2 shrink-0">
+          <SortHeader label="5m" field="priceChange5m" currentField={sortField} direction={sortDirection} onSort={handleSort} className="w-14 justify-end" />
           <SortHeader label="1h" field="priceChange1h" currentField={sortField} direction={sortDirection} onSort={handleSort} className="w-14 justify-end" />
-          <SortHeader label="24h" field="priceChange24h" currentField={sortField} direction={sortDirection} onSort={handleSort} className="w-14 justify-end hidden sm:flex" />
+          <SortHeader label="24h" field="priceChange24h" currentField={sortField} direction={sortDirection} onSort={handleSort} className="w-14 justify-end" />
         </div>
-        <SortHeader label="Vol" field="volume24h" currentField={sortField} direction={sortDirection} onSort={handleSort} className="w-16 justify-end hidden sm:flex" />
-        <SortHeader label="Liq" field="liquidity" currentField={sortField} direction={sortDirection} onSort={handleSort} className="w-16 justify-end hidden md:flex" />
-        <SortHeader label="Txns" field="trades24h" currentField={sortField} direction={sortDirection} onSort={handleSort} className="w-12 justify-end" />
-        <SortHeader label="Age" field="createdAt" currentField={sortField} direction={sortDirection} onSort={handleSort} className="w-10 justify-end" />
-      </div>
-
-      {/* Mobile Header */}
-      <div className="sm:hidden flex items-center justify-between px-3 py-2 bg-black/30 border-b border-white/10 shrink-0">
-        <span className="text-xs text-gray-400">Token</span>
-        <div className="flex gap-4">
-          <SortHeader label="1h" field="priceChange1h" currentField={sortField} direction={sortDirection} onSort={handleSort} />
-          <SortHeader label="Vol" field="volume24h" currentField={sortField} direction={sortDirection} onSort={handleSort} />
-        </div>
+        <SortHeader label="Vol" field="volume24h" currentField={sortField} direction={sortDirection} onSort={handleSort} className="w-16 justify-end shrink-0" />
+        <SortHeader label="Liq" field="liquidity" currentField={sortField} direction={sortDirection} onSort={handleSort} className="w-16 justify-end shrink-0" />
+        <SortHeader label="Txns" field="trades24h" currentField={sortField} direction={sortDirection} onSort={handleSort} className="w-14 justify-end shrink-0" />
+        <SortHeader label="Age" field="createdAt" currentField={sortField} direction={sortDirection} onSort={handleSort} className="w-10 justify-end shrink-0" />
       </div>
 
       {/* Token List */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Desktop View */}
-        <div className="hidden sm:block">
-          {tokens.map((token, index) => (
-            <TokenRow key={token.address} token={token} index={index} />
-          ))}
-        </div>
-        
-        {/* Mobile View */}
-        <div className="sm:hidden">
-          {tokens.map((token, index) => (
-            <MobileTokenCard key={token.address} token={token} index={index} />
-          ))}
-        </div>
+      <div className="flex-1 overflow-y-auto overflow-x-auto">
+        {tokens.map((token, index) => (
+          <TokenRow key={token.address} token={token} index={index} />
+        ))}
       </div>
     </div>
   );
