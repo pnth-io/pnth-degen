@@ -346,82 +346,154 @@ const StatsHeader = memo(({
 
 StatsHeader.displayName = 'StatsHeader';
 
-// Clickable X-axis for time range selection
-const ClickableXAxis = memo(({ 
-  width, 
-  height,
-  maxAgeMs,
-  onTimeClick
-}: { 
-  width: number; 
-  height: number;
-  maxAgeMs: number;
-  onTimeClick: (ms: number) => void;
-}) => {
+// X-axis labels only (no interaction)
+const XAxisLabels = memo(({ width, height, maxAgeMs }: { width: number; height: number; maxAgeMs: number }) => {
   const chartWidth = width - PADDING.left - PADDING.right;
   const axisY = height - PADDING.bottom + 15;
-  
-  const handleAxisClick = useCallback((e: React.MouseEvent<SVGRectElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const ratio = clickX / chartWidth;
-    const newTime = MIN_TIME_MS + ratio * (MAX_TIME_MS - MIN_TIME_MS);
-    onTimeClick(Math.round(newTime));
-  }, [chartWidth, onTimeClick]);
   
   const maxMinutes = maxAgeMs / 60000;
   const numLabels = Math.min(6, Math.ceil(maxMinutes) + 1);
   const step = maxMinutes / (numLabels - 1);
   const labels = Array.from({ length: numLabels }, (_, i) => i * step);
   
-  const currentRatio = (maxAgeMs - MIN_TIME_MS) / (MAX_TIME_MS - MIN_TIME_MS);
-  const indicatorX = PADDING.left + currentRatio * chartWidth;
-  
   return (
-    <g className="x-axis-clickable">
-      <rect
-        x={PADDING.left}
-        y={axisY - 20}
-        width={chartWidth}
-        height={60}
-        fill="transparent"
-        className="cursor-pointer"
-        onClick={handleAxisClick}
-      />
-      
+    <g>
       <line
         x1={PADDING.left}
         y1={axisY}
         x2={width - PADDING.right}
         y2={axisY}
-        stroke="rgba(97, 202, 135, 0.3)"
-        strokeWidth={2}
+        stroke="rgba(97, 202, 135, 0.2)"
+        strokeWidth={1}
       />
-      
       {labels.map((min, i) => {
         const x = PADDING.left + (i / (numLabels - 1)) * chartWidth;
         const label = min < 1 ? `${Math.round(min * 60)}s` : `${min.toFixed(min % 1 === 0 ? 0 : 1)}m`;
         return (
           <g key={i}>
-            <line x1={x} y1={axisY - 5} x2={x} y2={axisY + 5} stroke="rgba(97, 202, 135, 0.5)" strokeWidth={1} />
-            <text x={x} y={axisY + 20} className="fill-textTertiary text-xs" textAnchor="middle">{label}</text>
+            <line x1={x} y1={axisY - 4} x2={x} y2={axisY + 4} stroke="rgba(97, 202, 135, 0.3)" strokeWidth={1} />
+            <text x={x} y={axisY + 18} className="fill-textTertiary text-[10px]" textAnchor="middle">{label}</text>
           </g>
         );
       })}
-      
-      <circle cx={indicatorX} cy={axisY} r={6} fill="#61CA87" className="drop-shadow-lg" />
-      <text x={indicatorX} y={axisY + 35} className="fill-success text-xs font-bold" textAnchor="middle">
-        {formatTimeRange(maxAgeMs)}
-      </text>
-      
-      <text x={width / 2} y={height - 15} className="fill-textSecondary text-sm font-medium" textAnchor="middle">
-        TOKEN AGE — CLICK TO ADJUST RANGE
-      </text>
     </g>
   );
 });
 
-ClickableXAxis.displayName = 'ClickableXAxis';
+XAxisLabels.displayName = 'XAxisLabels';
+
+// Time presets
+const TIME_PRESETS = [
+  { label: '30s', value: 30 * 1000 },
+  { label: '1m', value: 60 * 1000 },
+  { label: '2m', value: 2 * 60 * 1000 },
+  { label: '5m', value: 5 * 60 * 1000 },
+  { label: '10m', value: 10 * 60 * 1000 },
+];
+
+// TradingView-style time range bar
+const TimeRangeBar = memo(({ 
+  value, 
+  onChange 
+}: { 
+  value: number; 
+  onChange: (ms: number) => void;
+}) => {
+  const barRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  
+  // Convert value to position (0-1)
+  const valueToPos = (ms: number) => (ms - MIN_TIME_MS) / (MAX_TIME_MS - MIN_TIME_MS);
+  const posToValue = (pos: number) => MIN_TIME_MS + Math.max(0, Math.min(1, pos)) * (MAX_TIME_MS - MIN_TIME_MS);
+  
+  const position = valueToPos(value);
+  
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+  
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging || !barRef.current) return;
+    const rect = barRef.current.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    onChange(Math.round(posToValue(pos)));
+  }, [isDragging, onChange]);
+  
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+  
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp]);
+  
+  const handleBarClick = useCallback((e: React.MouseEvent) => {
+    if (!barRef.current) return;
+    const rect = barRef.current.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    onChange(Math.round(posToValue(pos)));
+  }, [onChange]);
+
+  return (
+    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-bgContainer/90 border border-borderDefault px-3 py-2 rounded-lg">
+      {/* Preset buttons */}
+      <div className="flex items-center gap-1">
+        {TIME_PRESETS.map((preset) => (
+          <button
+            key={preset.label}
+            onClick={() => onChange(preset.value)}
+            className={`px-2 py-1 text-xs font-medium rounded transition-all ${
+              value === preset.value
+                ? 'bg-success text-black'
+                : 'text-textSecondary hover:text-success hover:bg-success/10'
+            }`}
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
+      
+      {/* Divider */}
+      <div className="w-px h-5 bg-borderDefault" />
+      
+      {/* Draggable range bar */}
+      <div 
+        ref={barRef}
+        className="relative w-32 h-2 bg-bgBase rounded-full cursor-pointer"
+        onClick={handleBarClick}
+      >
+        {/* Track fill */}
+        <div 
+          className="absolute top-0 left-0 h-full bg-success/30 rounded-full"
+          style={{ width: `${position * 100}%` }}
+        />
+        {/* Draggable handle */}
+        <div
+          className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-success rounded-full border-2 border-bgBase shadow-lg cursor-grab transition-transform ${
+            isDragging ? 'scale-125 cursor-grabbing' : 'hover:scale-110'
+          }`}
+          style={{ left: `calc(${position * 100}% - 8px)` }}
+          onMouseDown={handleMouseDown}
+        />
+      </div>
+      
+      {/* Current value display */}
+      <div className="text-xs font-bold text-success min-w-[40px] text-center">
+        {formatTimeRange(value)}
+      </div>
+    </div>
+  );
+});
+
+TimeRangeBar.displayName = 'TimeRangeBar';
 
 // Single bubble - now with direct event handlers, no CSS animation
 const TokenBubbleElement = memo(({ 
@@ -648,12 +720,7 @@ export default function Garden() {
           
           {/* Axis labels */}
           <YAxisLabels height={dimensions.height} />
-          <ClickableXAxis 
-            width={dimensions.width} 
-            height={dimensions.height} 
-            maxAgeMs={maxAgeMs}
-            onTimeClick={setMaxAgeMs}
-          />
+          <XAxisLabels width={dimensions.width} height={dimensions.height} maxAgeMs={maxAgeMs} />
           
           {/* Migration line */}
           <MigrationLine width={dimensions.width} height={dimensions.height} />
@@ -673,6 +740,9 @@ export default function Garden() {
       
       {/* Hover card */}
       {hoverInfo && <HoverCard info={hoverInfo} containerRect={containerRect} />}
+      
+      {/* Time range bar */}
+      <TimeRangeBar value={maxAgeMs} onChange={setMaxAgeMs} />
       
       {/* Loading state */}
       {!hasInitialData && (
