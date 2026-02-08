@@ -68,7 +68,7 @@ export function useScreenerData(): UseScreenerDataReturn {
       const client = getMobulaClient();
       
       // Fetch pairs for Solana
-      const response = await client.fetchBlockchainPairs({
+      const response = await client.fetchMarketBlockchainPairs({
         blockchain: 'solana',
         sortBy: 'volume',
         limit: MAX_TOKENS,
