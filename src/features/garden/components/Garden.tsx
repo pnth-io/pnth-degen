@@ -15,7 +15,7 @@ const MIGRATION_MCAP = 35_000; // $35k migration line
 const LOGO_MCAP_THRESHOLD = 25_000; // $25k - show logo above this
 const MIN_BUBBLE_SIZE = 8;
 const MAX_BUBBLE_SIZE = 40;
-const PADDING = { top: 60, right: 40, bottom: 80, left: 80 };
+const PADDING = { top: 60, right: 40, bottom: 50, left: 80 };
 const CHART_BOTTOM_MARGIN = 30;
 
 // Pump protocol identifiers
@@ -346,52 +346,7 @@ const StatsHeader = memo(({
 
 StatsHeader.displayName = 'StatsHeader';
 
-// X-axis labels only (no interaction)
-const XAxisLabels = memo(({ width, height, maxAgeMs }: { width: number; height: number; maxAgeMs: number }) => {
-  const chartWidth = width - PADDING.left - PADDING.right;
-  const axisY = height - PADDING.bottom + 15;
-  
-  const maxMinutes = maxAgeMs / 60000;
-  const numLabels = Math.min(6, Math.ceil(maxMinutes) + 1);
-  const step = maxMinutes / (numLabels - 1);
-  const labels = Array.from({ length: numLabels }, (_, i) => i * step);
-  
-  return (
-    <g>
-      <line
-        x1={PADDING.left}
-        y1={axisY}
-        x2={width - PADDING.right}
-        y2={axisY}
-        stroke="rgba(97, 202, 135, 0.2)"
-        strokeWidth={1}
-      />
-      {labels.map((min, i) => {
-        const x = PADDING.left + (i / (numLabels - 1)) * chartWidth;
-        const label = min < 1 ? `${Math.round(min * 60)}s` : `${min.toFixed(min % 1 === 0 ? 0 : 1)}m`;
-        return (
-          <g key={i}>
-            <line x1={x} y1={axisY - 4} x2={x} y2={axisY + 4} stroke="rgba(97, 202, 135, 0.3)" strokeWidth={1} />
-            <text x={x} y={axisY + 18} className="fill-textTertiary text-[10px]" textAnchor="middle">{label}</text>
-          </g>
-        );
-      })}
-    </g>
-  );
-});
-
-XAxisLabels.displayName = 'XAxisLabels';
-
-// Time presets
-const TIME_PRESETS = [
-  { label: '30s', value: 30 * 1000 },
-  { label: '1m', value: 60 * 1000 },
-  { label: '2m', value: 2 * 60 * 1000 },
-  { label: '5m', value: 5 * 60 * 1000 },
-  { label: '10m', value: 10 * 60 * 1000 },
-];
-
-// TradingView-style time range bar
+// Full-width draggable time bar at the bottom
 const TimeRangeBar = memo(({ 
   value, 
   onChange 
@@ -402,23 +357,28 @@ const TimeRangeBar = memo(({
   const barRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   
-  // Convert value to position (0-1)
   const valueToPos = (ms: number) => (ms - MIN_TIME_MS) / (MAX_TIME_MS - MIN_TIME_MS);
   const posToValue = (pos: number) => MIN_TIME_MS + Math.max(0, Math.min(1, pos)) * (MAX_TIME_MS - MIN_TIME_MS);
   
   const position = valueToPos(value);
   
+  const updateFromEvent = useCallback((clientX: number) => {
+    if (!barRef.current) return;
+    const rect = barRef.current.getBoundingClientRect();
+    const pos = (clientX - rect.left) / rect.width;
+    onChange(Math.round(posToValue(pos)));
+  }, [onChange]);
+  
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     setIsDragging(true);
-  }, []);
+    updateFromEvent(e.clientX);
+  }, [updateFromEvent]);
   
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging || !barRef.current) return;
-    const rect = barRef.current.getBoundingClientRect();
-    const pos = (e.clientX - rect.left) / rect.width;
-    onChange(Math.round(posToValue(pos)));
-  }, [isDragging, onChange]);
+    if (!isDragging) return;
+    updateFromEvent(e.clientX);
+  }, [isDragging, updateFromEvent]);
   
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -434,60 +394,51 @@ const TimeRangeBar = memo(({
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
-  
-  const handleBarClick = useCallback((e: React.MouseEvent) => {
-    if (!barRef.current) return;
-    const rect = barRef.current.getBoundingClientRect();
-    const pos = (e.clientX - rect.left) / rect.width;
-    onChange(Math.round(posToValue(pos)));
-  }, [onChange]);
+
+  // Time labels
+  const labels = ['30s', '2m', '4m', '6m', '8m', '10m'];
 
   return (
-    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-bgContainer/90 border border-borderDefault px-3 py-2 rounded-lg">
-      {/* Preset buttons */}
-      <div className="flex items-center gap-1">
-        {TIME_PRESETS.map((preset) => (
-          <button
-            key={preset.label}
-            onClick={() => onChange(preset.value)}
-            className={`px-2 py-1 text-xs font-medium rounded transition-all ${
-              value === preset.value
-                ? 'bg-success text-black'
-                : 'text-textSecondary hover:text-success hover:bg-success/10'
-            }`}
-          >
-            {preset.label}
-          </button>
+    <div className="absolute bottom-0 left-0 right-0 h-10 bg-bgContainer border-t border-borderDefault">
+      {/* Time labels */}
+      <div className="absolute top-0 left-0 right-0 flex justify-between px-4 pt-0.5">
+        {labels.map((label, i) => (
+          <span key={i} className="text-[10px] text-textTertiary">{label}</span>
         ))}
       </div>
       
-      {/* Divider */}
-      <div className="w-px h-5 bg-borderDefault" />
-      
-      {/* Draggable range bar */}
+      {/* Draggable bar area */}
       <div 
         ref={barRef}
-        className="relative w-32 h-2 bg-bgBase rounded-full cursor-pointer"
-        onClick={handleBarClick}
+        className="absolute bottom-1 left-4 right-4 h-4 cursor-ew-resize"
+        onMouseDown={handleMouseDown}
       >
-        {/* Track fill */}
+        {/* Track background */}
+        <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-1 bg-borderDefault rounded-full" />
+        
+        {/* Selected range (from 0 to handle) */}
         <div 
-          className="absolute top-0 left-0 h-full bg-success/30 rounded-full"
+          className="absolute top-1/2 -translate-y-1/2 left-0 h-1 bg-success/50 rounded-full"
           style={{ width: `${position * 100}%` }}
         />
+        
         {/* Draggable handle */}
         <div
-          className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-success rounded-full border-2 border-bgBase shadow-lg cursor-grab transition-transform ${
-            isDragging ? 'scale-125 cursor-grabbing' : 'hover:scale-110'
+          className={`absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-success rounded-sm border border-success shadow-lg transition-transform ${
+            isDragging ? 'scale-150' : 'hover:scale-125'
           }`}
-          style={{ left: `calc(${position * 100}% - 8px)` }}
-          onMouseDown={handleMouseDown}
+          style={{ left: `calc(${position * 100}% - 6px)` }}
         />
-      </div>
-      
-      {/* Current value display */}
-      <div className="text-xs font-bold text-success min-w-[40px] text-center">
-        {formatTimeRange(value)}
+        
+        {/* Current value tooltip */}
+        {isDragging && (
+          <div 
+            className="absolute -top-6 px-1.5 py-0.5 bg-success text-black text-[10px] font-bold rounded"
+            style={{ left: `calc(${position * 100}% - 16px)` }}
+          >
+            {formatTimeRange(value)}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -718,9 +669,8 @@ export default function Garden() {
             fill="url(#grid)" 
           />
           
-          {/* Axis labels */}
+          {/* Y-axis labels only */}
           <YAxisLabels height={dimensions.height} />
-          <XAxisLabels width={dimensions.width} height={dimensions.height} maxAgeMs={maxAgeMs} />
           
           {/* Migration line */}
           <MigrationLine width={dimensions.width} height={dimensions.height} />
