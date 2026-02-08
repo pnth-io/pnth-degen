@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getMobulaClient } from '@/lib/mobulaClient';
 import type { ScreenerToken, SortField, SortDirection, ScreenerFilters } from '../types';
 
-const REFRESH_INTERVAL = 5000; // 5 seconds UI update
 const FETCH_INTERVAL = 30000; // 30 seconds full refresh
 const MAX_TOKENS = 100;
+const API_URL = 'https://api.mobula.io/api/1/market/blockchain/pairs';
 
 interface UseScreenerDataReturn {
   tokens: ScreenerToken[];
@@ -59,24 +58,30 @@ export function useScreenerData(): UseScreenerDataReturn {
 
   // Refs for cleanup
   const fetchIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const wsRef = useRef<WebSocket | null>(null);
   const tokenCacheRef = useRef<Map<string, ScreenerToken>>(new Map());
   const mountedRef = useRef(true);
 
   const fetchTokens = useCallback(async () => {
     try {
-      const client = getMobulaClient();
-      
-      // Fetch pairs for Solana
-      const response = await client.fetchMarketBlockchainPairs({
-        blockchain: 'solana',
-        sortBy: 'volume',
-        limit: MAX_TOKENS,
-      });
+      const apiKey = process.env.NEXT_PUBLIC_MOBULA_API_KEY;
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+      if (apiKey) {
+        headers['Authorization'] = apiKey;
+      }
 
+      const url = `${API_URL}?blockchain=solana&sortBy=volume&limit=${MAX_TOKENS}`;
+      const response = await fetch(url, { headers });
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const json = await response.json();
       if (!mountedRef.current) return;
 
-      const data = response?.data || response || [];
+      const data = json?.data || json || [];
       const mapped = (Array.isArray(data) ? data : []).map(mapMobulaToken);
       
       // Update cache
@@ -154,11 +159,6 @@ export function useScreenerData(): UseScreenerDataReturn {
       if (fetchIntervalRef.current) {
         clearInterval(fetchIntervalRef.current);
         fetchIntervalRef.current = null;
-      }
-      
-      if (wsRef.current) {
-        wsRef.current.close();
-        wsRef.current = null;
       }
       
       tokenCacheRef.current.clear();
