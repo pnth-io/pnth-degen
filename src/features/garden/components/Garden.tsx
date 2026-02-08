@@ -12,6 +12,7 @@ const MAX_TIME_MS = 10 * 60 * 1000; // 10 minutes
 const DEFAULT_TIME_MS = 5 * 60 * 1000; // 5 minutes default
 const MAX_MCAP = 100_000; // $100k - filter out tokens above this
 const MIGRATION_MCAP = 35_000; // $35k migration line
+const LOGO_MCAP_THRESHOLD = 25_000; // $25k - show logo above this
 const MIN_BUBBLE_SIZE = 8;
 const MAX_BUBBLE_SIZE = 40;
 const PADDING = { top: 60, right: 40, bottom: 80, left: 80 }; // Increased bottom padding
@@ -140,8 +141,8 @@ function calculateBubble(
   // Color based on last trade direction (buy = green, sell = red)
   const color = data.lastTradeIsBuy ? '#61CA87' : '#ef4444';
   
-  // Determine if has logo (bonding and bonded tokens show logos)
-  const hasLogo = type !== 'new' && !!data.logo;
+  // Determine if has logo (show logo when mcap >= $25k)
+  const hasLogo = data.marketCap >= LOGO_MCAP_THRESHOLD && !!data.logo;
   
   return {
     token,
@@ -300,46 +301,6 @@ const YAxisLabels = memo(({ height }: { height: number }) => {
 
 YAxisLabels.displayName = 'YAxisLabels';
 
-// X-axis labels - dynamic based on maxAge
-const XAxisLabels = memo(({ width, height, maxAgeMs }: { width: number; height: number; maxAgeMs: number }) => {
-  const maxMinutes = maxAgeMs / 60000;
-  const numLabels = Math.min(6, Math.ceil(maxMinutes) + 1);
-  const step = maxMinutes / (numLabels - 1);
-  const labels = Array.from({ length: numLabels }, (_, i) => i * step);
-  
-  const chartWidth = width - PADDING.left - PADDING.right;
-  
-  return (
-    <>
-      {labels.map((min, i) => {
-        const x = PADDING.left + (i / (numLabels - 1)) * chartWidth;
-        const label = min < 1 ? `${Math.round(min * 60)}s` : `${min.toFixed(min % 1 === 0 ? 0 : 1)}m`;
-        return (
-          <text
-            key={i}
-            x={x}
-            y={height - PADDING.bottom + 35}
-            className="fill-textTertiary text-xs"
-            textAnchor="middle"
-          >
-            {label}
-          </text>
-        );
-      })}
-      <text
-        x={width / 2}
-        y={height - 20}
-        className="fill-textSecondary text-sm font-medium"
-        textAnchor="middle"
-      >
-        TOKEN AGE
-      </text>
-    </>
-  );
-});
-
-XAxisLabels.displayName = 'XAxisLabels';
-
 // Migration line
 const MigrationLine = memo(({ width, height }: { width: number; height: number }) => {
   const chartHeight = height - PADDING.top - PADDING.bottom - CHART_BOTTOM_MARGIN;
@@ -401,100 +362,123 @@ const StatsHeader = memo(({
 
 StatsHeader.displayName = 'StatsHeader';
 
-// Timeline slider component
-const TimelineSlider = memo(({ 
-  value, 
-  onChange,
-  width 
+// Clickable X-axis for time range selection
+const ClickableXAxis = memo(({ 
+  width, 
+  height,
+  maxAgeMs,
+  onTimeClick
 }: { 
-  value: number; 
-  onChange: (ms: number) => void;
-  width: number;
+  width: number; 
+  height: number;
+  maxAgeMs: number;
+  onTimeClick: (ms: number) => void;
 }) => {
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
+  const chartWidth = width - PADDING.left - PADDING.right;
+  const axisY = height - PADDING.bottom + 15;
   
-  const sliderWidth = Math.min(200, width - PADDING.left - PADDING.right - 100);
-  const sliderLeft = PADDING.left + 50;
+  // Handle click on X-axis area
+  const handleAxisClick = useCallback((e: React.MouseEvent<SVGRectElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const ratio = clickX / chartWidth;
+    // Map click position to time: left = 30s, right = 10m
+    const newTime = MIN_TIME_MS + ratio * (MAX_TIME_MS - MIN_TIME_MS);
+    onTimeClick(Math.round(newTime));
+  }, [chartWidth, onTimeClick]);
   
-  // Convert value to position (0-1)
-  const valueToPosition = (ms: number) => {
-    return (ms - MIN_TIME_MS) / (MAX_TIME_MS - MIN_TIME_MS);
-  };
+  // Generate tick marks
+  const maxMinutes = maxAgeMs / 60000;
+  const numLabels = Math.min(6, Math.ceil(maxMinutes) + 1);
+  const step = maxMinutes / (numLabels - 1);
+  const labels = Array.from({ length: numLabels }, (_, i) => i * step);
   
-  // Convert position to value
-  const positionToValue = (pos: number) => {
-    const clamped = Math.max(0, Math.min(1, pos));
-    return MIN_TIME_MS + clamped * (MAX_TIME_MS - MIN_TIME_MS);
-  };
-  
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
-  
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging || !sliderRef.current) return;
-    
-    const rect = sliderRef.current.getBoundingClientRect();
-    const pos = (e.clientX - rect.left) / rect.width;
-    onChange(positionToValue(pos));
-  }, [isDragging, onChange]);
-  
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-  
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
-  
-  const position = valueToPosition(value);
+  // Current position indicator
+  const currentRatio = (maxAgeMs - MIN_TIME_MS) / (MAX_TIME_MS - MIN_TIME_MS);
+  const indicatorX = PADDING.left + currentRatio * chartWidth;
   
   return (
-    <div 
-      className="absolute flex items-center gap-2"
-      style={{ left: sliderLeft, bottom: PADDING.bottom - 60, width: sliderWidth + 80 }}
-    >
-      <span className="text-xs text-textTertiary w-8">30s</span>
-      <div
-        ref={sliderRef}
-        className="relative h-2 bg-bgContainer border border-borderDefault rounded-full cursor-pointer flex-1"
-        onMouseDown={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          const pos = (e.clientX - rect.left) / rect.width;
-          onChange(positionToValue(pos));
-          setIsDragging(true);
-        }}
+    <g className="x-axis-clickable">
+      {/* Clickable area */}
+      <rect
+        x={PADDING.left}
+        y={axisY - 20}
+        width={chartWidth}
+        height={60}
+        fill="transparent"
+        className="cursor-pointer"
+        onClick={handleAxisClick}
+      />
+      
+      {/* Axis line */}
+      <line
+        x1={PADDING.left}
+        y1={axisY}
+        x2={width - PADDING.right}
+        y2={axisY}
+        stroke="rgba(97, 202, 135, 0.3)"
+        strokeWidth={2}
+      />
+      
+      {/* Tick marks and labels */}
+      {labels.map((min, i) => {
+        const x = PADDING.left + (i / (numLabels - 1)) * chartWidth;
+        const label = min < 1 ? `${Math.round(min * 60)}s` : `${min.toFixed(min % 1 === 0 ? 0 : 1)}m`;
+        return (
+          <g key={i}>
+            <line
+              x1={x}
+              y1={axisY - 5}
+              x2={x}
+              y2={axisY + 5}
+              stroke="rgba(97, 202, 135, 0.5)"
+              strokeWidth={1}
+            />
+            <text
+              x={x}
+              y={axisY + 20}
+              className="fill-textTertiary text-xs"
+              textAnchor="middle"
+            >
+              {label}
+            </text>
+          </g>
+        );
+      })}
+      
+      {/* Current time indicator */}
+      <circle
+        cx={indicatorX}
+        cy={axisY}
+        r={6}
+        fill="#61CA87"
+        className="drop-shadow-lg"
+      />
+      
+      {/* Current time label */}
+      <text
+        x={indicatorX}
+        y={axisY + 35}
+        className="fill-success text-xs font-bold"
+        textAnchor="middle"
       >
-        {/* Track fill */}
-        <div 
-          className="absolute top-0 left-0 h-full bg-success/30 rounded-full"
-          style={{ width: `${position * 100}%` }}
-        />
-        {/* Thumb */}
-        <div
-          className={`absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-success rounded-full border-2 border-bgBase cursor-grab shadow-lg transition-transform ${isDragging ? 'scale-125 cursor-grabbing' : 'hover:scale-110'}`}
-          style={{ left: `calc(${position * 100}% - 8px)` }}
-          onMouseDown={handleMouseDown}
-        />
-      </div>
-      <span className="text-xs text-textTertiary w-8">10m</span>
-      <div className="ml-2 px-2 py-1 bg-success/20 border border-success/40 rounded text-xs text-success font-medium">
-        {formatTimeRange(value)}
-      </div>
-    </div>
+        {formatTimeRange(maxAgeMs)}
+      </text>
+      
+      {/* Axis title */}
+      <text
+        x={width / 2}
+        y={height - 15}
+        className="fill-textSecondary text-sm font-medium"
+        textAnchor="middle"
+      >
+        TOKEN AGE — CLICK TO ADJUST RANGE
+      </text>
+    </g>
   );
 });
 
-TimelineSlider.displayName = 'TimelineSlider';
+ClickableXAxis.displayName = 'ClickableXAxis';
 
 // Single bubble component with CSS animation
 const TokenBubbleElement = memo(({ 
@@ -734,15 +718,6 @@ export default function Garden() {
         <span className="text-xs text-textTertiary ml-2">PUMP.FUN</span>
       </div>
       
-      {/* Timeline slider */}
-      {dimensions.width > 0 && (
-        <TimelineSlider 
-          value={maxAgeMs} 
-          onChange={setMaxAgeMs}
-          width={dimensions.width}
-        />
-      )}
-      
       {/* SVG Chart */}
       {dimensions.width > 0 && dimensions.height > 0 && (
         <svg width={dimensions.width} height={dimensions.height} className="absolute inset-0">
@@ -762,7 +737,12 @@ export default function Garden() {
           
           {/* Axis labels */}
           <YAxisLabels height={dimensions.height} />
-          <XAxisLabels width={dimensions.width} height={dimensions.height} maxAgeMs={maxAgeMs} />
+          <ClickableXAxis 
+            width={dimensions.width} 
+            height={dimensions.height} 
+            maxAgeMs={maxAgeMs}
+            onTimeClick={setMaxAgeMs}
+          />
           
           {/* Migration line */}
           <MigrationLine width={dimensions.width} height={dimensions.height} />
