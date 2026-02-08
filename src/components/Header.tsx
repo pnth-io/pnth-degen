@@ -159,6 +159,16 @@ const Header = () => {
                 Pulse
               </Link>
               <Link 
+                href="/screener" 
+                className={`text-sm transition-all whitespace-nowrap ${
+                  pathname === '/screener' 
+                    ? 'text-success font-semibold pnth-text-glow' 
+                    : 'text-textSecondary hover:text-success'
+                }`}
+              >
+                Screener
+              </Link>
+              <Link 
                 href="/embed" 
                 className={`text-sm transition-all whitespace-nowrap ${
                   pathname?.startsWith('/embed') 
