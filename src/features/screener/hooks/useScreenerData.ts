@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { ScreenerToken, SortField, SortDirection, ScreenerFilters } from '../types';
 
 const FETCH_INTERVAL = 30000; // 30 seconds full refresh
-const MAX_TOKENS = 100;
-const API_URL = 'https://api.mobula.io/api/1/market/blockchain/pairs';
+const API_URL = 'https://api.mobula.io/api/1/metadata/trendings';
 
 interface UseScreenerDataReturn {
   tokens: ScreenerToken[];
@@ -22,27 +21,31 @@ interface UseScreenerDataReturn {
 }
 
 function mapMobulaToken(item: any): ScreenerToken {
+  // Get address from contracts array (Solana)
+  const solanaContract = item.contracts?.find((c: any) => c.blockchain === 'Solana');
+  const address = solanaContract?.address || item.address || '';
+  
   return {
-    address: item.address || item.tokenAddress || '',
-    pairAddress: item.pairAddress || item.address || '',
+    address,
+    pairAddress: item.pair || address,
     symbol: item.symbol || 'UNKNOWN',
     name: item.name || item.symbol || 'Unknown',
     logo: item.logo || item.image,
     price: item.price || 0,
-    priceChange5m: item.price_change_5min || item.priceChange5m || 0,
-    priceChange1h: item.price_change_1h || item.priceChange1h || 0,
-    priceChange6h: item.price_change_6h || item.priceChange6h || 0,
-    priceChange24h: item.price_change_24h || item.priceChange24h || 0,
-    volume24h: item.volume_24h || item.volume24h || 0,
+    priceChange5m: item.price_change_5min || 0,
+    priceChange1h: item.price_change_1h || 0,
+    priceChange6h: item.price_change_6h || 0,
+    priceChange24h: item.price_change_24h || 0,
+    volume24h: item.volume_24h || item.volume || 0,
     liquidity: item.liquidity || 0,
-    marketCap: item.marketCap || item.market_cap || 0,
-    trades24h: item.trades_24h || item.trades24h || 0,
-    buys24h: item.buys_24h || item.buys24h || 0,
-    sells24h: item.sells_24h || item.sells24h || 0,
-    buyers24h: item.buyers_24h || item.buyers24h || 0,
-    sellers24h: item.sellers_24h || item.sellers24h || 0,
-    createdAt: item.createdAt || item.created_at || new Date().toISOString(),
-    exchange: item.exchange?.name || item.dex,
+    marketCap: item.market_cap || 0,
+    trades24h: item.trades_24h || 0,
+    buys24h: item.buys_24h || 0,
+    sells24h: item.sells_24h || 0,
+    buyers24h: item.buyers_24h || 0,
+    sellers24h: item.sellers_24h || 0,
+    createdAt: item.createdAt || new Date().toISOString(),
+    exchange: item.platforms?.[0]?.name || 'Unknown',
     security: item.security,
   };
 }
@@ -71,7 +74,7 @@ export function useScreenerData(): UseScreenerDataReturn {
         headers['Authorization'] = apiKey;
       }
 
-      const url = `${API_URL}?blockchain=solana&sortBy=volume&limit=${MAX_TOKENS}`;
+      const url = `${API_URL}?blockchain=solana`;
       const response = await fetch(url, { headers });
       
       if (!response.ok) {
