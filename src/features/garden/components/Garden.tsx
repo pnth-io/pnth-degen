@@ -346,7 +346,7 @@ const StatsHeader = memo(({
 
 StatsHeader.displayName = 'StatsHeader';
 
-// Full-width draggable time bar at the bottom
+// Time bar - drag right = more time, drag left = less time
 const TimeRangeBar = memo(({ 
   value, 
   onChange 
@@ -355,91 +355,52 @@ const TimeRangeBar = memo(({
   onChange: (ms: number) => void;
 }) => {
   const barRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  
-  const valueToPos = (ms: number) => (ms - MIN_TIME_MS) / (MAX_TIME_MS - MIN_TIME_MS);
-  const posToValue = (pos: number) => MIN_TIME_MS + Math.max(0, Math.min(1, pos)) * (MAX_TIME_MS - MIN_TIME_MS);
-  
-  const position = valueToPos(value);
-  
-  const updateFromEvent = useCallback((clientX: number) => {
-    if (!barRef.current) return;
-    const rect = barRef.current.getBoundingClientRect();
-    const pos = (clientX - rect.left) / rect.width;
-    onChange(Math.round(posToValue(pos)));
-  }, [onChange]);
+  const dragStartRef = useRef<{ x: number; value: number } | null>(null);
   
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
-    setIsDragging(true);
-    updateFromEvent(e.clientX);
-  }, [updateFromEvent]);
+    dragStartRef.current = { x: e.clientX, value };
+  }, [value]);
   
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging) return;
-    updateFromEvent(e.clientX);
-  }, [isDragging, updateFromEvent]);
+    if (!dragStartRef.current || !barRef.current) return;
+    
+    const deltaX = e.clientX - dragStartRef.current.x;
+    const barWidth = barRef.current.offsetWidth;
+    
+    // Sensitivity: full bar width = full range
+    const deltaRatio = deltaX / barWidth;
+    const deltaMs = deltaRatio * (MAX_TIME_MS - MIN_TIME_MS);
+    
+    const newValue = Math.round(
+      Math.max(MIN_TIME_MS, Math.min(MAX_TIME_MS, dragStartRef.current.value + deltaMs))
+    );
+    
+    onChange(newValue);
+  }, [onChange]);
   
   const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
+    dragStartRef.current = null;
   }, []);
   
   useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
-
-  // Time labels
-  const labels = ['30s', '2m', '4m', '6m', '8m', '10m'];
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 h-10 bg-bgContainer border-t border-borderDefault">
-      {/* Time labels */}
-      <div className="absolute top-0 left-0 right-0 flex justify-between px-4 pt-0.5">
-        {labels.map((label, i) => (
-          <span key={i} className="text-[10px] text-textTertiary">{label}</span>
-        ))}
-      </div>
-      
-      {/* Draggable bar area */}
-      <div 
-        ref={barRef}
-        className="absolute bottom-1 left-4 right-4 h-4 cursor-ew-resize"
-        onMouseDown={handleMouseDown}
-      >
-        {/* Track background */}
-        <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-1 bg-borderDefault rounded-full" />
-        
-        {/* Selected range (from 0 to handle) */}
-        <div 
-          className="absolute top-1/2 -translate-y-1/2 left-0 h-1 bg-success/50 rounded-full"
-          style={{ width: `${position * 100}%` }}
-        />
-        
-        {/* Draggable handle */}
-        <div
-          className={`absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-success rounded-sm border border-success shadow-lg transition-transform ${
-            isDragging ? 'scale-150' : 'hover:scale-125'
-          }`}
-          style={{ left: `calc(${position * 100}% - 6px)` }}
-        />
-        
-        {/* Current value tooltip */}
-        {isDragging && (
-          <div 
-            className="absolute -top-6 px-1.5 py-0.5 bg-success text-black text-[10px] font-bold rounded"
-            style={{ left: `calc(${position * 100}% - 16px)` }}
-          >
-            {formatTimeRange(value)}
-          </div>
-        )}
-      </div>
+    <div 
+      ref={barRef}
+      className="absolute bottom-0 left-0 right-0 h-8 bg-bgContainer border-t border-borderDefault cursor-ew-resize select-none flex items-center justify-center"
+      onMouseDown={handleMouseDown}
+    >
+      <span className="text-xs text-textSecondary pointer-events-none">
+        {formatTimeRange(value)} <span className="text-textTertiary">← drag →</span>
+      </span>
     </div>
   );
 });
