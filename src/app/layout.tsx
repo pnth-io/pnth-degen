@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Toaster } from "@/components/ui/sonner"
 import { EIP6963Initializer } from '@/components/wallet/EIP6963Initializer';
+import { SolPriceProvider } from '@/components/SolPriceProvider';
 import { WalletPortfolioModalWrapper } from '@/components/shared/WalletPortfolioModalWrapper';
 
 export const metadata = {
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <div className="pnth-grid-background" />
         
         <EIP6963Initializer />
+        <SolPriceProvider />
         <Toaster />
           <div className="flex flex-col min-h-screen relative z-10">
             <header className="sticky top-0 z-50">
