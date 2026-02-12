@@ -611,14 +611,14 @@ const TimeRangeBar = memo(({
 
 TimeRangeBar.displayName = 'TimeRangeBar';
 
-// Single bubble - now with direct event handlers, no CSS animation
-const TokenBubbleElement = memo(({ 
-  bubble, 
+// Single bubble — positioned via transform with CSS transition for smooth movement
+const TokenBubbleElement = memo(({
+  bubble,
   isHovered,
   onHover,
   onClick
-}: { 
-  bubble: TokenBubble; 
+}: {
+  bubble: TokenBubble;
   isHovered: boolean;
   onHover: (bubble: TokenBubble | null, e?: React.MouseEvent) => void;
   onClick: (bubble: TokenBubble) => void;
@@ -626,19 +626,25 @@ const TokenBubbleElement = memo(({
   const handleMouseEnter = useCallback((e: React.MouseEvent) => {
     onHover(bubble, e);
   }, [bubble, onHover]);
-  
+
   const handleMouseLeave = useCallback(() => {
     onHover(null);
   }, [onHover]);
-  
+
   const handleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     onClick(bubble);
   }, [bubble, onClick]);
 
+  const r = bubble.size / 2;
+
   return (
-    <g 
+    <g
       className="cursor-pointer"
+      style={{
+        transform: `translate(${bubble.x}px, ${bubble.y}px)`,
+        transition: 'transform 1s linear',
+      }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
@@ -646,9 +652,9 @@ const TokenBubbleElement = memo(({
       {/* Fire effect for migrated */}
       {bubble.isMigrated && (
         <circle
-          cx={bubble.x}
-          cy={bubble.y}
-          r={bubble.size / 2 + 4}
+          cx={0}
+          cy={0}
+          r={r + 4}
           fill="none"
           stroke="#f97316"
           strokeWidth={2}
@@ -656,12 +662,12 @@ const TokenBubbleElement = memo(({
           className="animate-pulse"
         />
       )}
-      
+
       {/* Main bubble */}
       {bubble.hasLogo && bubble.logo ? (
         <foreignObject
-          x={bubble.x - bubble.size / 2}
-          y={bubble.y - bubble.size / 2}
+          x={-r}
+          y={-r}
           width={bubble.size}
           height={bubble.size}
         >
@@ -680,19 +686,19 @@ const TokenBubbleElement = memo(({
         </foreignObject>
       ) : (
         <circle
-          cx={bubble.x}
-          cy={bubble.y}
-          r={bubble.size / 2}
+          cx={0}
+          cy={0}
+          r={r}
           fill={bubble.color}
           opacity={0.9}
         />
       )}
-      
+
       {/* Label for larger bubbles */}
       {bubble.size > 20 && (
         <text
-          x={bubble.x}
-          y={bubble.y + bubble.size / 2 + 12}
+          x={0}
+          y={r + 12}
           className="fill-textSecondary text-[10px] pointer-events-none"
           textAnchor="middle"
         >

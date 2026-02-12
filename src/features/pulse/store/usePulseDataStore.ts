@@ -40,7 +40,7 @@ export interface PulseDataStoreState {
   getFilteredTokens(view: ViewName): PulseToken[]; // NEW
 }
 
-const TOKEN_LIMIT = 50; // Maximum tokens per view
+const TOKEN_LIMIT = 150; // Maximum tokens per view
 const PULSE_DEBUG = process.env.NEXT_PUBLIC_PULSE_DEBUG === 'true';
 
 /**
