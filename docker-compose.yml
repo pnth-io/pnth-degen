@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     labels:
       - traefik.enable=true
-      - traefik.http.routers.pnth-degen.rule=Host(`degen.pnth.app`)
+      - traefik.http.routers.pnth-degen.rule=Host(`screener.pnth.io`) || Host(`screener.pnth.app`)
       - traefik.http.routers.pnth-degen.entrypoints=websecure
       - traefik.http.routers.pnth-degen.tls.certresolver=letsencrypt
       - traefik.http.services.pnth-degen.loadbalancer.server.port=3000
