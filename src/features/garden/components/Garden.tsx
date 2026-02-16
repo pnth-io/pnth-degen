@@ -436,54 +436,142 @@ const GardenHoverCard = memo(({ info, containerRect }: { info: HoverInfo; contai
 
 GardenHoverCard.displayName = 'GardenHoverCard';
 
-// Y-axis labels — non-linear scale matching mcapToY
-const YAxisLabels = memo(({ height, maxMcap, migrationMcap }: { height: number; maxMcap: number; migrationMcap: number }) => {
+// Grid lines component — proper visible grid like Karta
+const GridLines = memo(({ 
+  width, 
+  height, 
+  maxMcap, 
+  migrationMcap,
+  maxAgeMs 
+}: { 
+  width: number; 
+  height: number; 
+  maxMcap: number; 
+  migrationMcap: number;
+  maxAgeMs: number;
+}) => {
+  const chartWidth = width - PADDING.left - PADDING.right;
   const chartHeight = height - PADDING.top - PADDING.bottom - CHART_BOTTOM_MARGIN;
   const yBase = height - PADDING.bottom - CHART_BOTTOM_MARGIN;
 
-  // Key mcap values to label
-  const labelValues: number[] = [0];
+  // Y-axis: mcap values for horizontal lines
+  const yLabelValues: number[] = [0];
   const migK = migrationMcap / 1000;
-  const maxK = maxMcap / 1000;
-
-  // Add evenly spaced labels below migration
   const belowStep = Math.max(5, Math.ceil(migK / 4 / 5) * 5);
   for (let v = belowStep; v < migK; v += belowStep) {
-    labelValues.push(v * 1000);
+    yLabelValues.push(v * 1000);
   }
-  // Always add migration value
-  labelValues.push(migrationMcap);
-  // Add a label or two above migration
+  yLabelValues.push(migrationMcap);
   const aboveRange = maxMcap - migrationMcap;
   if (aboveRange > 5000) {
     const aboveMid = migrationMcap + aboveRange / 2;
-    labelValues.push(Math.round(aboveMid / 1000) * 1000);
+    yLabelValues.push(Math.round(aboveMid / 1000) * 1000);
   }
-  labelValues.push(maxMcap);
+  yLabelValues.push(maxMcap);
+
+  // X-axis: time values for vertical lines
+  const maxAgeSec = maxAgeMs / 1000;
+  const maxAgeMin = maxAgeSec / 60;
+  
+  // Determine step based on time range
+  let stepMs: number;
+  if (maxAgeMin <= 2) {
+    stepMs = 30 * 1000; // 30s steps
+  } else if (maxAgeMin <= 5) {
+    stepMs = 60 * 1000; // 1m steps
+  } else if (maxAgeMin <= 15) {
+    stepMs = 2.5 * 60 * 1000; // 2.5m steps
+  } else {
+    stepMs = 5 * 60 * 1000; // 5m steps
+  }
+
+  const xValues: number[] = [];
+  for (let t = 0; t <= maxAgeMs; t += stepMs) {
+    xValues.push(t);
+  }
+  if (xValues[xValues.length - 1] !== maxAgeMs) {
+    xValues.push(maxAgeMs);
+  }
 
   return (
     <>
-      {labelValues.map((mcapVal) => {
+      {/* Horizontal grid lines (Y-axis / mcap) */}
+      {yLabelValues.map((mcapVal) => {
         const y = mcapToY(mcapVal, migrationMcap, maxMcap, chartHeight, yBase);
         const kVal = mcapVal / 1000;
         return (
-          <text
-            key={mcapVal}
-            x={PADDING.left - 10}
-            y={y}
-            className="fill-textTertiary text-xs"
-            textAnchor="end"
-            dominantBaseline="middle"
-          >
-            ${kVal % 1 === 0 ? kVal.toFixed(0) : kVal.toFixed(1)}K
-          </text>
+          <g key={`y-${mcapVal}`}>
+            <line
+              x1={PADDING.left}
+              y1={y}
+              x2={width - PADDING.right}
+              y2={y}
+              stroke="#61CA87"
+              strokeWidth={1}
+              opacity={0.15}
+            />
+            <text
+              x={PADDING.left - 10}
+              y={y}
+              className="fill-textTertiary text-xs"
+              textAnchor="end"
+              dominantBaseline="middle"
+            >
+              ${kVal % 1 === 0 ? kVal.toFixed(0) : kVal.toFixed(1)}K
+            </text>
+          </g>
         );
       })}
+
+      {/* Vertical grid lines (X-axis / time) */}
+      {xValues.map((timeMs) => {
+        const xPercent = timeMs / maxAgeMs;
+        const x = PADDING.left + xPercent * chartWidth;
+        const minutes = Math.floor(timeMs / 60000);
+        const seconds = Math.floor((timeMs % 60000) / 1000);
+        const label = minutes > 0 
+          ? (seconds > 0 ? `${minutes}m${seconds}s` : `${minutes}m`)
+          : `${seconds}s`;
+        
+        return (
+          <g key={`x-${timeMs}`}>
+            <line
+              x1={x}
+              y1={PADDING.top}
+              x2={x}
+              y2={yBase}
+              stroke="#61CA87"
+              strokeWidth={1}
+              opacity={0.15}
+            />
+            <text
+              x={x}
+              y={yBase + 15}
+              className="fill-textTertiary text-xs"
+              textAnchor="middle"
+              dominantBaseline="middle"
+            >
+              {label}
+            </text>
+          </g>
+        );
+      })}
+
+      {/* X-axis label */}
+      <text
+        x={PADDING.left + chartWidth / 2}
+        y={height - PADDING.bottom - 5}
+        className="fill-textTertiary text-xs uppercase tracking-wider"
+        textAnchor="middle"
+        dominantBaseline="middle"
+      >
+        TOKEN AGE
+      </text>
     </>
   );
 });
 
-YAxisLabels.displayName = 'YAxisLabels';
+GridLines.displayName = 'GridLines';
 
 // Migration line
 const MigrationLine = memo(({ width, height, migrationMcap }: { width: number; height: number; migrationMcap: number }) => {
@@ -828,22 +916,14 @@ export default function Garden() {
       {/* SVG Chart */}
       {dimensions.width > 0 && dimensions.height > 0 && (
         <svg width={dimensions.width} height={dimensions.height} className="absolute inset-0">
-          {/* Grid lines */}
-          <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(97, 202, 135, 0.05)" strokeWidth="1" />
-            </pattern>
-          </defs>
-          <rect 
-            x={PADDING.left} 
-            y={PADDING.top} 
-            width={dimensions.width - PADDING.left - PADDING.right}
-            height={dimensions.height - PADDING.top - PADDING.bottom - CHART_BOTTOM_MARGIN}
-            fill="url(#grid)" 
+          {/* Grid lines with labels */}
+          <GridLines 
+            width={dimensions.width} 
+            height={dimensions.height} 
+            maxMcap={maxMcap} 
+            migrationMcap={migrationMcap}
+            maxAgeMs={maxAgeMs}
           />
-          
-          {/* Y-axis labels only */}
-          <YAxisLabels height={dimensions.height} maxMcap={maxMcap} migrationMcap={migrationMcap} />
           
           {/* Migration line */}
           <MigrationLine width={dimensions.width} height={dimensions.height} migrationMcap={migrationMcap} />
